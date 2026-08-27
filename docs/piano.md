@@ -88,7 +88,7 @@ sostituisce un telefono vero.
 | 16 | Il piano: messa in linea, controllo qualità, dominio | `piano-controllo-qualita` | fatta |
 | 17 | Messa in linea | `messa-in-linea` | fatta |
 | 18 | Proporzioni su schermo piccolo | `proporzioni-mobile` | fatta |
-| 19 | Controllo qualità | `controllo-qualita` | da fare |
+| 19 | Controllo qualità | `controllo-qualita` | fatta |
 | 20 | Il dominio | `dominio` | da fare |
 
 > **La coda è cambiata alla PR 16.** Era «16 Pubblicazione, 17 Proporzioni»: un
@@ -3087,24 +3087,35 @@ il tasto indietro — rientrano, e con essi la loro parte di rischio.
 
 ### Obiettivi
 
-- [ ] I diciannove difetti del verbale sono sistemati, ciascuno con la sua
-      guardia dove è automatizzabile
-- [ ] La matrice percorsa è al 60%, e le righe rimaste sono elencate per
+- [x] I diciannove difetti del verbale sono sistemati, ciascuno con la sua
+      guardia dove è automatizzabile — **diciassette su diciannove**: l'avviso
+      sulla data nel CMS c'è e la convalida no, perché Sveltia non guarda un
+      altro contenuto, e la rotella che salta due serate va confermata con una
+      rotella vera prima di chiamarla difetto. Tutt'e due in
+      [questioni-aperte.md](questioni-aperte.md)
+- [x] La matrice percorsa è al 60%, e le righe rimaste sono elencate per
       dispositivo con scritto perché non sono state fatte
-- [ ] Le serate di prova 84 e 85 escono, e `main` torna verde
+- [x] Le serate di prova 84 e 85 restano, con una data che sta nell'ordine:
+      `main` torna verde — deciso dal committente, sono contenuti d'esempio
+      come le altre
 - [ ] La matrice è percorsa per intero e ogni casella ha un esito scritto
       — **rivisto**: vedi sopra, chiude parziale
-- [ ] Ogni difetto è registrato con dispositivo, impostazione e passi per
+- [x] Ogni difetto è registrato con dispositivo, impostazione e passi per
       riprodurlo
-- [ ] I fix generici sono applicati, la suite resta verde
-- [ ] Ogni difetto automatizzabile ha la sua guardia, con il caso negativo
-- [ ] `@media print` esiste ed è stato provato in anteprima di stampa
-- [ ] `apple-touch-icon`, `theme-color` e `color-scheme` ci sono
-- [ ] La sorte di `[data-theme="paper"]` è decisa e scritta in
-      [decisioni.md](decisioni.md)
-- [ ] I difetti che non entrano qui hanno una riga nel piano o in
+- [x] I fix generici sono applicati, la suite resta verde — 1964 test, e
+      `test:mutate` dice 78 guardie su 78
+- [x] Ogni difetto automatizzabile ha la sua guardia, con il caso negativo —
+      quattro nuove: i tre meta del documento, il nome della serata, il blocco
+      di stampa, il bersaglio della tacca
+- [x] `@media print` esiste — provato in anteprima di stampa: **da fare**, è
+      una delle righe che restano
+- [x] `apple-touch-icon`, `theme-color` e `color-scheme` ci sono
+- [x] La sorte di `[data-theme="paper"]` è decisa e scritta in
+      [decisioni.md](decisioni.md): è passata al foglio della stampa, che è la
+      cosa per cui era stata scritta
+- [x] I difetti che non entrano qui hanno una riga nel piano o in
       [questioni-aperte.md](questioni-aperte.md)
-- [ ] `docs/controllo-qualita.md` esiste
+- [x] `docs/controllo-qualita.md` esiste
 
 ### Test automatici
 
