@@ -24,6 +24,7 @@
  * publish one publishes it absolute.
  */
 import '../styles/global.css';
+import '../styles/print.css';
 import ClipShapes from '../components/ClipShapes.astro';
 import CycleAccents from '../components/CycleAccents.astro';
 import SiteNav from '../components/SiteNav.astro';
@@ -98,8 +99,21 @@ const preview = Astro.site && image ? new URL(image, Astro.site).href : undefine
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex, follow" />}
 
+    {/* The three that are only noticed by looking, and that PR 19 went looking
+        for. `theme-color` paints the browser's own bar in the brand's blue
+        instead of leaving it grey above a dark blue page. `color-scheme` tells
+        the engine this is a dark surface, so the scrollbars, the form controls
+        and the `<dialog>` backdrop come dark instead of arriving white on a
+        night-blue site. `apple-touch-icon` is what iOS puts on the Home screen:
+        without it, it shrinks a screenshot of the page — which here is a
+        full-screen scene, so a blue smudge. All three are the layout's kind of
+        thing: forgotten, nothing fails. */}
+    <meta name="theme-color" content="#003049" />
+    <meta name="color-scheme" content="dark" />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     {canonical && <link rel="canonical" href={canonical} />}
 
     <meta property="og:type" content="website" />

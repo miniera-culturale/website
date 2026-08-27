@@ -42,6 +42,52 @@ reversibile e prima o poi qualcuno vorrà stampare la foto di una serata.
 
 Non è ancora stato deciso dove.
 
+## Aperte dal controllo qualità
+
+### Centotrentasei caselle che vogliono un dispositivo che non c'è
+
+**Aperta il 17 agosto 2026, alla PR 19.** La matrice del collaudo è stata
+percorsa per 202 caselle su 338. Le altre non sono state saltate per fretta:
+vogliono un iPhone (89 righe, di cui 30 su Safari fra 15.4 e 16.3, che è la
+soglia dichiarata del progetto e non l'ha mai aperta nessuno), un Mac per Safari
+(28), due screen reader veri — VoiceOver e NVDA (13) — e una connessione lenta
+vera (3). L'elenco per dispositivo, con scritto in testa a ciascuno che cosa
+quel dispositivo serve a trovare, è in
+[controllo-qualita-da-fare.md](controllo-qualita-da-fare.md).
+
+Non si risolve con più lavoro: si risolve con i dispositivi. Le due strade sono
+prestarli per mezza giornata, o affittare un servizio di device farm — e la
+seconda non risponde comunque alla domanda degli screen reader, che vanno
+sentiti.
+
+Quattro di quelle righe non le può percorrere **nessuna** automazione, su
+nessuna macchina: `document.hasFocus()` è falso quando la finestra non è in
+primo piano, quindi `:focus` e `:focus-visible` non fanno match e nessuno stile
+di messa a fuoco si applica. Provato in headless e con la finestra aperta, su
+Firefox 153.
+
+### La convalida che il CMS non sa fare
+
+**Aperta il 17 agosto 2026, alla PR 19.** Il numero di una serata è l'ordine del
+sito, quindi la sua data deve venire dopo quella della serata precedente: se i
+due ordini divergono la build si ferma. Il controllo c'è ed è giusto che ci sia
+— è la regola 10 — ma sta alla fine del viaggio, dopo il commit, e chi compila
+il form non lo sa. È stato riprodotto **due volte su due tentativi**, il secondo
+da un'altra persona e da un telefono.
+
+Quello che si è potuto fare è dirlo nel campo, come suggerimento. Quello che
+manca è una convalida che guardi un altro contenuto, e Sveltia non la offre: le
+sue regole sono per campo. Le strade sono tre, e nessuna è gratis:
+
+- un controllo lato CMS scritto come widget personalizzato, che vuole
+  JavaScript nel bundle del CMS e quindi la manutenzione di quel codice;
+- lasciare che la build fallisca e **far arrivare l'errore al redattore** invece
+  che a chi guarda i log — una notifica, o una pagina di stato;
+- accettarlo, e contare sul fatto che le serate si inseriscono in ordine.
+
+Va deciso con il committente, perché la terza è ragionevole solo se chi scrive è
+sempre la stessa persona.
+
 ## Blocca la PR 20
 
 ### I testi, i numeri e le persone delle pagine istituzionali

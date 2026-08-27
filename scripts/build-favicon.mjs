@@ -22,6 +22,24 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const faviconSource = join(root, 'public', 'favicon.svg');
 export const faviconTarget = join(root, 'public', 'favicon.ico');
 
+/* The icon iOS puts on the Home screen. Without one it takes a screenshot of
+   the page and shrinks it, which on a site that opens on a full-screen scene is
+   a blue smudge — found at PR 19, on a phone. 180×180 is what current iPhones
+   ask for, and one size is enough: iOS downscales, and the drawing is three
+   rectangles. PNG and not SVG, which iOS still does not take here, and opaque
+   because a transparent one is composited onto black. The tile already carries
+   its own blue ground, so nothing has to be added underneath. */
+export const appleIconTarget = join(root, 'public', 'apple-touch-icon.png');
+export const APPLE_ICON_SIZE = 180;
+
+/** The apple-touch-icon the given drawing produces, as bytes. Writes nothing. */
+export async function buildAppleTouchIcon(source = faviconSource) {
+  return sharp(source, { density: 384 })
+    .resize(APPLE_ICON_SIZE, APPLE_ICON_SIZE, { fit: 'contain' })
+    .png({ compressionLevel: 9 })
+    .toBuffer();
+}
+
 /* 32 for the tab and the bookmark bar, 16 for the browsers that still pick the
    smallest one. Beyond those two the .svg has long since taken over. */
 const SIZES = [32, 16];
@@ -75,4 +93,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   console.log(
     `favicon.ico written with ${sizes.map((size) => `${size}×${size}`).join(' and ')}`,
   );
+
+  writeFileSync(appleIconTarget, await buildAppleTouchIcon());
+  console.log(`apple-touch-icon.png written at ${APPLE_ICON_SIZE}×${APPLE_ICON_SIZE}`);
 }

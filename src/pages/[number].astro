@@ -26,6 +26,7 @@
 import { getImage } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Programme from '../components/Programme.astro';
+import { eveningTitle } from '../lib/events.ts';
 import { loadProgramme } from '../lib/programme.ts';
 
 export async function getStaticPaths() {
@@ -69,7 +70,7 @@ const preview =
 
 /* «Serata 81 — Chi tiene aperto il quartiere»: the number first, because that
    is what the association calls its evenings and what the address says. */
-const title = `Serata ${scene.number} — ${scene.title}`;
+const title = eveningTitle(scene);
 ---
 
 <Base title={title} description={scene.description} image={preview} cycle={scene.cycle.number}>

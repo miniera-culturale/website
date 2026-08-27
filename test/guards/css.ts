@@ -699,3 +699,65 @@ export function checkDuplicateDeclarations(css: string): Violation[] {
 
   return violations;
 }
+
+/**
+ * The published CSS carries a print block.
+ *
+ * `Ctrl+P` on a scroller of full-screen scenes with mandatory snap gives
+ * eighty-one pages of nothing anybody chose — and the audience of this
+ * association is fifty and sixty years old, so the programme of the season is
+ * something they print. The rule is guarded on `dist/` and not on the source
+ * because that is where a stylesheet can be lost: the minifier has taken things
+ * away before, and this one arrives through an import that nothing else refers
+ * to.
+ */
+export function checkPrintStyles(css: string, path = 'the published CSS'): Violation[] {
+  const clean = stripComments(css);
+  if (!/@media[^{]*\bprint\b/i.test(clean)) {
+    return [
+      {
+        rule: 'style',
+        detail: `${path}: no \`@media print\` block. On paper the programme is a scroller one viewport tall with eighty other evenings scrolled out of reach, and what comes out of the printer is decided by nobody`,
+      },
+    ];
+  }
+  return [];
+}
+
+/**
+ * The Timeline's tick is at least as big as the site's own touch target.
+ *
+ * Two tokens for one job: `--tap-target` is 44px and the phone's disclosure
+ * respects it, while `--timeline-tick-height` was 36 — measured with a finger
+ * at PR 19, on the one control a reader uses to move through eighty-one
+ * evenings. The bar sums itself out of the tick, so raising it is safe and the
+ * token's own comment says so; what this guard stops is somebody lowering it
+ * again to win back a few pixels on a short screen, which is precisely where
+ * the temptation is.
+ */
+export function checkTickTouchTarget(css: string, path = 'the tokens'): Violation[] {
+  const clean = stripComments(css);
+  const read = (name: string): string | undefined =>
+    new RegExp(`--${name}\s*:\s*([^;}]+)`).exec(clean)?.[1]?.trim();
+
+  const tick = read('timeline-tick-height');
+  if (!tick) return [];
+
+  /* Written as the token itself, which is the form that cannot drift. */
+  if (/var\(\s*--tap-target\s*\)/.test(tick)) return [];
+
+  const pixels = /^(\d+(?:\.\d+)?)px$/.exec(tick);
+  const target = read('tap-target');
+  const targetPixels = target ? /^(\d+(?:\.\d+)?)px$/.exec(target) : null;
+  if (!pixels || !targetPixels) return [];
+
+  if (Number(pixels[1]) < Number(targetPixels[1])) {
+    return [
+      {
+        rule: 'style',
+        detail: `${path}: \`--timeline-tick-height\` is ${tick} while \`--tap-target\` is ${target}. They are the same job — something a finger has to hit — and the tick is the one a reader uses eighty-one times`,
+      },
+    ];
+  }
+  return [];
+}

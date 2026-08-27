@@ -24,8 +24,10 @@ import EpisodeBadge from '../components/EpisodeBadge.astro';
 import EventCard from '../components/EventCard.astro';
 import GuestRow from '../components/GuestRow.astro';
 import Label from '../components/Label.astro';
+import Placeholder from '../components/Placeholder.astro';
 import SignatureBand from '../components/SignatureBand.astro';
 import { CLIP_SHAPES } from '../lib/shapes.ts';
+import { PLACEHOLDER_IMAGES, PLACEHOLDER_TEXTS } from '../lib/placeholder.ts';
 import { loadProgramme } from '../lib/programme.ts';
 import { fullAddress } from '../lib/venues.ts';
 
@@ -133,6 +135,23 @@ const guest = scene.speakers[0];
     </section>
 
     <section class="gallery-section">
+      <h2>Placeholder</h2>
+      <div class="column">
+        <Placeholder hint>
+          <p>{PLACEHOLDER_TEXTS.manifestoLead}</p>
+        </Placeholder>
+        <Placeholder class="page-frame">{PLACEHOLDER_IMAGES.hall}</Placeholder>
+      </div>
+      <p class="note">
+        Il componente che marca ciò che l'associazione non ha ancora scritto:
+        la cornice che il lettore vede e il <code>data-placeholder</code> che la
+        guardia legge, messi insieme perché quello che si dimentica è sempre
+        l'invisibile. Non era in rassegna fino alla PR 19, ed è l'unico degli
+        otto la cui resa non fosse verificata da nessuna parte.
+      </p>
+    </section>
+
+    <section class="gallery-section">
       <h2>GuestRow</h2>
       <div class="column">
         {
@@ -159,6 +178,14 @@ const guest = scene.speakers[0];
         Il ritratto è un riquadro di prova: nessun relatore d'esempio ha una
         foto. Il ritaglio è quello vero — <code>clip-clover-8</code>, a 56×56,
         che è la misura del design.
+      </p>
+      <p class="note">
+        Le prime due righe hanno il nome a due misure diverse, e non è
+        un'incoerenza: <code>--guest-size</code> è la proprietà con cui il
+        componente si tara, la prima porta il valore che le dà una scena e la
+        seconda quello predefinito. Senza questa riga si leggono come lo stesso
+        componente reso in due modi — la rassegna esiste per mostrare le
+        varianti, quindi deve anche nominarle.
       </p>
     </section>
 

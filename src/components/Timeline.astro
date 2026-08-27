@@ -233,7 +233,14 @@ function rank(index: number): string | undefined {
      Here the box does take pointer events — it has a ground and an edge and
      reads as a bar, so a finger landing on it is on a control and not on the
      evening behind it. */
-  @media (max-width: 900px) {
+  /* `min-height` insieme alla larghezza, ed è ciò che tiene il telefono
+     orizzontale fuori di qui: la barra in basso costa 78 px di altezza, che su
+     uno schermo girato ne lascia centoventi al contenuto, e l'altezza è
+     esattamente la cosa che lì non c'è. Sotto i 481 px valgono le regole di
+     sopra — la rotaia verticale a destra — che è la forma giusta quando lo
+     spazio abbonda in larghezza. Nessuna riga duplicata: cambia la condizione,
+     non le dichiarazioni. */
+  @media (max-width: 900px) and (min-height: 481px) {
     .timeline {
       top: auto;
       right: var(--space-3);

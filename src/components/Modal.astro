@@ -168,6 +168,14 @@
     height: 18px;
   }
 
+  /* Empty until something opens the modal, and an empty heading is a line in
+     the heading list of a screen reader that names nothing — found at PR 19,
+     asking NVDA for the outline of `/`. `display: none` takes it out of the
+     tree; the moment the script writes a title it is back. */
+  .modal-title:empty {
+    display: none;
+  }
+
   .modal-title {
     margin: 0 0 var(--space-4);
     font-size: var(--text-2xl);

@@ -478,3 +478,117 @@ export function checkSkipLinkStyle(css: string, path = 'the published CSS'): Vio
 
   return violations;
 }
+
+/**
+ * The three things a page is only ever caught missing by looking at it.
+ *
+ * `theme-color` paints the browser's own bar; `color-scheme` tells the engine
+ * the page is dark, so the scrollbars and the form controls do not arrive white
+ * on a night-blue site; `apple-touch-icon` is what iOS puts on the Home screen
+ * instead of a shrunken screenshot of the page. None of the three fails
+ * anything when it is gone — which is exactly the layout's kind of promise, and
+ * the reason PR 19 found all three missing at once by opening the site on a
+ * phone rather than by running the suite.
+ *
+ * The value is read, not just the presence of the tag: `theme-color` with an
+ * empty content is a tag that satisfies a search and paints nothing.
+ */
+export function checkDocumentChrome(markup: string, path = 'the page'): Violation[] {
+  const clean = readableMarkup(markup);
+  const violations: Violation[] = [];
+
+  const meta = (name: string): string | undefined => {
+    for (const tag of clean.match(/<meta\b[^>]*>/gi) ?? []) {
+      if ((attributeOf(tag, 'name') ?? '').toLowerCase() === name) {
+        return (attributeOf(tag, 'content') ?? '').trim();
+      }
+    }
+    return undefined;
+  };
+
+  const themeColour = meta('theme-color');
+  if (!themeColour) {
+    violations.push({
+      rule: 'document',
+      detail: `${path}: no \`theme-color\`, so the browser's own bar stays grey above a page that is not — it is the first thing a reader sees on a phone, and nothing else in the suite can see it`,
+    });
+  }
+
+  const scheme = meta('color-scheme');
+  if (!scheme) {
+    violations.push({
+      rule: 'document',
+      detail: `${path}: no \`color-scheme\`, so scrollbars, form controls and the dialog backdrop are drawn light over a dark site`,
+    });
+  } else if (!/\bdark\b/i.test(scheme)) {
+    violations.push({
+      rule: 'document',
+      detail: `${path}: \`color-scheme\` is \`${scheme}\`, which does not name \`dark\` — this site has one surface and it is dark`,
+    });
+  }
+
+  const icon = (clean.match(/<link\b[^>]*>/gi) ?? []).find(
+    (tag) => (attributeOf(tag, 'rel') ?? '').toLowerCase().trim() === 'apple-touch-icon',
+  );
+  const href = icon ? (attributeOf(icon, 'href') ?? '').trim() : '';
+  if (!href) {
+    violations.push({
+      rule: 'document',
+      detail: `${path}: no \`apple-touch-icon\`, so iOS puts a shrunken screenshot of the page on the Home screen — here a full-screen scene, which is a blue smudge`,
+    });
+  }
+
+  return violations;
+}
+
+/**
+ * Every scene carries the name of its evening, and it is the same name the
+ * evening's own route publishes as its `<title>`.
+ *
+ * The scroller writes `data-title` into `document.title` as the reader passes
+ * from one evening to the next — rule 16 asks the address to follow, and until
+ * PR 19 the title did not, so a bookmark taken halfway down the archive saved
+ * «/78» under the name «Il programma». Two copies of a name are two names the
+ * day one is edited, and this is what stops them: the attribute and the title
+ * are both `eveningTitle()`, and here they are compared as published.
+ */
+export function checkSceneTitles(
+  pages: readonly { path: string; markup: string }[],
+): Violation[] {
+  const violations: Violation[] = [];
+
+  /* What each route publishes as its own title, by evening number. */
+  const titles = new Map<string, string>();
+  for (const { path, markup } of pages) {
+    const number = /(?:^|\/)(\d+)(?:\/index\.html|\.html)?$/.exec(path)?.[1];
+    if (!number) continue;
+    const title = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(markup)?.[1]?.trim();
+    if (title) titles.set(number, title);
+  }
+
+  for (const { path, markup } of pages) {
+    for (const tag of readableMarkup(markup).match(/<section\b[^>]*data-scene[^>]*>/gi) ?? []) {
+      const number = (attributeOf(tag, 'data-number') ?? '').trim();
+      const name = (attributeOf(tag, 'data-title') ?? '').trim();
+      if (!number) continue;
+
+      if (!name) {
+        violations.push({
+          rule: 'scene',
+          detail: `${path}: evening ${number} has no \`data-title\`, so the scroller has no name to put in the tab as the reader arrives — the address would follow the evening and the title would not`,
+        });
+        continue;
+      }
+
+      const published = titles.get(number);
+      if (published && published !== name) {
+        violations.push({
+          rule: 'scene',
+          detail: `${path}: evening ${number} carries \`data-title="${name}"\` while its own route /${number} is titled «${published}» — one evening with two names is the drift this attribute exists to prevent`,
+        });
+      }
+    }
+  }
+
+  return violations;
+}

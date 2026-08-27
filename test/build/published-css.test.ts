@@ -9,6 +9,8 @@ import {
   checkMediaRangeSyntax,
   checkNoColorMixOrOklch,
   checkPixelFontSizes,
+  checkPrintStyles,
+  checkTickTouchTarget,
   checkRgbTriples,
   checkSceneHeightFallback,
   checkUndefinedCustomProperties,
@@ -71,6 +73,17 @@ describe('the CSS that actually ships', () => {
 
   it('names every custom property in English', () => {
     expect(checkItalianCustomProperties(css, 'dist/')).toEqual([]);
+  });
+
+  it('carries a print block', () => {
+    // PR 19: there was none, and `Ctrl+P` gave eighty-one pages of whatever the
+    // scroller happened to be. The stylesheet arrives through an import nothing
+    // else refers to, which is exactly the kind of thing a bundler drops.
+    expect(checkPrintStyles(css, 'dist/')).toEqual([]);
+  });
+
+  it("keeps the Timeline tick as big as the site's own touch target", () => {
+    expect(checkTickTouchTarget(css, 'dist/')).toEqual([]);
   });
 
   it('still declares Archivo Black as a weight range', () => {

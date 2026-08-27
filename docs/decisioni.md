@@ -1986,6 +1986,74 @@ resta fermo mentre il testo cresce è quel che al testo dà lo spazio, e
 schermo a ogni impostazione. Una guardia che le segnalasse sarebbe una guardia
 che scatta sul lavoro giusto, e quelle si spengono. *(PR 18)*
 
+## Il controllo qualità
+
+**Sotto `prefers-reduced-motion` lo snap viene tolto, e non era scritto da
+nessuna parte.** Il collaudo l'ha trovato come un difetto — «non funziona lo
+snap» — e non lo è: nel CSS c'è una riga esplicita,
+`[data-scroller] { scroll-snap-type: none !important }`. La decisione regge, e
+la ragione è che uno snap obbligatorio è movimento che il lettore non ha
+chiesto: sposta la pagina di uno schermo intero per conto suo, ed è esattamente
+ciò che quella preferenza chiede di non fare. Quello che mancava era scriverlo:
+una decisione che nessuno ricorda è una decisione che il prossimo collaudo
+segnala di nuovo.
+
+**La palette chiara vive nel foglio della stampa.** `[data-theme="paper"]` era
+dichiarata in `colors.css` e non la impostava nessuno: una palette scritta e
+mai resa, che il piano della PR 19 chiedeva di decidere. È stata **spostata**,
+non copiata, dentro `@media print` di `src/styles/print.css`, che è la cosa per
+cui era stata scritta — il commento diceva «print, documents, email». Una copia
+lasciata indietro sarebbe stata due sorgenti per una palette, decise dall'ordine
+di due fogli: la regola 12 in un altro costume.
+
+**Il titolo della pagina segue la serata, e il nome si compone in un posto
+solo.** La regola 16 chiedeva che l'indirizzo seguisse la serata a schermo e non
+diceva niente del titolo, che è però la metà che un segnalibro salva davvero: a
+metà archivio il browser offriva «/78» sotto il nome «Il programma». Il nome lo
+compone `eveningTitle()` in `src/lib/events.ts`, la rotta `/N` lo usa per il suo
+`<title>` e la scena lo pubblica in `data-title`; lo script lo legge e non lo
+ricompone. Scriverlo nello script sarebbe stato il template in due posti, e due
+copie di un nome sono due nomi il giorno che se ne modifica una.
+
+**Sul telefono girato di lato cedono anche i relatori, l'etichetta del ciclo e
+la seconda riga della sede.** Fino alla PR 18 l'unica cosa che cedeva era la
+descrizione, perché era l'unica ripetuta per intero altrove. In orizzontale non
+basta: su un viewport di 786×268 — un telefono con le barre di Safari — la
+serata con due relatori e le registrazioni chiedeva centosettanta pixel più di
+quelli che ci sono, e a restare fuori erano la data, la sede e i bottoni. Cioè
+le tre cose per cui uno apre la pagina. L'ordine di ciò che cede è quindi: la
+descrizione, i relatori, l'etichetta del ciclo, la seconda riga della sede — e
+quello che resta è l'elenco che il piano dichiara: titolo, data, luogo, bottoni,
+nota. Il ciclo continua a dirlo l'accento di tutta la schermata.
+
+**E in orizzontale la Timeline torna rotaia verticale.** La barra in basso costa
+78 px di altezza su uno schermo che ne ha 268: più di un quarto. La condizione
+della media query è passata da «schermo stretto» a «schermo stretto **e** alto
+almeno 481 px», così sotto quella soglia valgono le regole del desktop — la
+rotaia a destra, dove lo spazio in larghezza abbonda. Nessuna dichiarazione
+duplicata: è cambiata la condizione, non le regole.
+
+**La rotella sopra una tacca muove il programma di una serata.** Le tacche hanno
+`pointer-events: auto` per restare cliccabili, e una tacca che cattura la
+rotella cerca un antenato che scorra: la rotaia non scorre e il documento è alto
+uno schermo, quindi il programma restava fermo. Non esiste un modo in CSS di
+dire «prendi i click ma non la rotella», quindi l'evento si inoltra a mano. Il
+primo tentativo sommava il delta allo `scrollTop` e non è sopravvissuto allo
+snap — duecento pixel dentro una scena di ottocento vengono riagganciati
+indietro, e la rotaia restava morta sembrando riparata. Quello che funziona è la
+stessa mossa dei tasti freccia: una serata per gesto, con una soglia di tempo
+perché un trackpad manda una raffica di eventi per un solo movimento della mano.
+
+**La fotografia si sposta invece di rimpicciolirsi soltanto.** Un rettangolo
+ruotato di 45° occupa `(w + h) / √2` in orizzontale, e la riga della griglia è
+alta quanto il testo che le sta accanto: la stessa percentuale atterra quindi
+diversamente su ogni serata, e le quattro d'esempio sbordavano di 10, 12, 27 e
+38 px sotto la rotaia. Ridurre l'altezza da sola avrebbe voluto dire portarla
+sotto la metà. Due leve insieme — 72% di altezza e il centro spostato di uno
+spazio verso sinistra, dentro il gap della colonna dove il posto c'è — la
+riportano tutta dentro senza toccare né la forma né l'inclinazione, che sono del
+marchio.
+
 ## Rimandate
 
 **Il dominio.** Se ne riparla a sito finito. Il design presuppone

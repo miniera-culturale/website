@@ -3064,9 +3064,36 @@ dispositivo. Versionato, perché il prossimo giro parta da lì e non dalla memor
 — e perché *«provato su un telefono»* senza dire quale è esattamente la frase che
 questo repository passa il tempo a smontare.
 
+### Che cosa questa PR fa davvero — deciso il 17 agosto, a collaudo iniziato
+
+Il collaudo ha percorso **202 caselle su 338** e ne ha trovate diciannove di
+rotte. Le 136 che restano non sono state saltate per fretta: vogliono un iPhone,
+un Mac e due screen reader, e nessuno dei tre è a portata di mano. Il piano non
+può quindi tenere «la matrice è percorsa per intero» come obiettivo di chiusura,
+perché sarebbe l'unica cosa che questo repository non permette: dichiarare
+provato ciò che non lo è.
+
+**La matrice resta parziale e lo dice.** Le righe aperte restano nel CSV con la
+casella vuota — non cancellate, non archiviate — e la loro elencazione per
+dispositivo sta in `docs/controllo-qualita-da-fare.md`. Ciò che manca diventa una
+voce di [questioni-aperte.md](questioni-aperte.md), perché è una mancanza di
+dispositivi e non di lavoro.
+
+**I diciannove difetti trovati si sistemano tutti qui**, ed è la decisione presa
+guardando la consegna: una beta che perde i bottoni su una finestra bassa e ha
+tre testi sotto il contrasto minimo non è una beta da mettere davanti a
+qualcuno. I due che il piano aveva assegnato a una PR propria — l'orizzontale e
+il tasto indietro — rientrano, e con essi la loro parte di rischio.
+
 ### Obiettivi
 
+- [ ] I diciannove difetti del verbale sono sistemati, ciascuno con la sua
+      guardia dove è automatizzabile
+- [ ] La matrice percorsa è al 60%, e le righe rimaste sono elencate per
+      dispositivo con scritto perché non sono state fatte
+- [ ] Le serate di prova 84 e 85 escono, e `main` torna verde
 - [ ] La matrice è percorsa per intero e ogni casella ha un esito scritto
+      — **rivisto**: vedi sopra, chiude parziale
 - [ ] Ogni difetto è registrato con dispositivo, impostazione e passi per
       riprodurlo
 - [ ] I fix generici sono applicati, la suite resta verde

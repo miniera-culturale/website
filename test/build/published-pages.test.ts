@@ -12,7 +12,9 @@ import { checkTimelineLinks, checkTimelineTargets, tickTags } from '../guards/ti
 import {
   checkAnchorsWithoutHref,
   checkDocumentBasics,
+  checkDocumentChrome,
   checkOpenGraph,
+  checkSceneTitles,
   checkSkipLink,
   checkSkipLinkStyle,
 } from '../guards/document.ts';
@@ -75,6 +77,13 @@ describe('every published page', () => {
     '%s carries the tags a link preview needs',
     (_path, page) => {
       expect(checkOpenGraph(page.html, page.path, { withDomain })).toEqual([]);
+    },
+  );
+
+  it.each(pages.map((page) => [page.path, page] as const))(
+    '%s carries the three things only an eye catches: theme-color, color-scheme, apple-touch-icon',
+    (_path, page) => {
+      expect(checkDocumentChrome(page.html, page.path)).toEqual([]);
     },
   );
 
@@ -288,4 +297,15 @@ describe('every published page', () => {
       expect(found.length).toBeGreaterThan(0);
     },
   );
+});
+
+/* Read across the pages rather than page by page: the question is whether the
+   name a scene carries is the same one that evening's own route publishes, and
+   that needs both of them in hand. */
+describe('the name of an evening', () => {
+  it('is the same in the scene and in the title of its route', () => {
+    expect(checkSceneTitles(pages.map((page) => ({ path: page.path, markup: page.html })))).toEqual(
+      [],
+    );
+  });
 });

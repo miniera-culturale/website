@@ -74,7 +74,12 @@
      raises the touch target — the obvious thing to do to a row of pills — and
      what it costs then is the note of every scene sliding under the bar, on a
      phone, silently. Timeline.astro draws itself from the same parts. */
-  --timeline-tick-height: 36px;
+  /* PR 19 raised it from 36px to the site's own target, measured with a finger
+     on a phone: the pill was 81×36 while the disclosure's tab, from
+     `--tap-target`, was already 44. Two tokens for one job, disagreeing — and
+     the comment above had promised the bar would follow, which it does: nothing
+     else changed and the note of every scene kept its clearance. */
+  --timeline-tick-height: var(--tap-target);
   --timeline-bar: calc(
     var(--timeline-tick-height) + var(--space-2) * 2 + var(--border-width-hairline) * 2 +
       var(--space-3)
