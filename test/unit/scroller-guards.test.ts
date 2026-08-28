@@ -214,6 +214,20 @@ describe('checkBareScrollWrite', () => {
     expect(checkBareScrollWrite(wrong, 'a.astro')).toHaveLength(1);
   });
 
+  it('does not let a second write borrow the set-aside of the first', () => {
+    // Where somebody would add one: right under a legitimate pair. The second
+    // write is animated all the same, and it is the one the hidden-tab defect
+    // arrives through.
+    const borrowed = [
+      "var behaviour = scroller.style.scrollBehavior;",
+      "scroller.style.scrollBehavior = 'auto';",
+      'scroller.scrollTop += delta;',
+      'scroller.style.scrollBehavior = behaviour;',
+      'scroller.scrollTop += more;',
+    ].join('\n');
+    expect(checkBareScrollWrite(borrowed, 'a.astro')).toHaveLength(1);
+  });
+
   it('does not fire on a set-aside too far above to be read as a pair', () => {
     const far = [
       "scroller.style.scrollBehavior = 'auto';",

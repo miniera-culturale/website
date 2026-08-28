@@ -94,7 +94,21 @@ const { scenes, openIndex } = Astro.props;
       } catch (error) {
         /* Undecoded, and still worth looking up. */
       }
-      if (asked && document.getElementById(asked)) return;
+      /* An address that names a scene wins over the opening evening, and from
+         PR 20 **the jump is ours even then**. Left to the browser it is a
+         fragment navigation, which takes its behaviour from the same property
+         as everything else: with `smooth` declared on the scroller it animates,
+         and an animation does not advance in a hidden tab. Measured at PR 20 on
+         the two deployments, same background tab — `/#serata-85` arrived at the
+         top of the archive on this branch and on the eighty-fifth on main. It is
+         the defect below in its other costume, and `#serata-N` is what a
+         Ctrl+click on a tick opens, so it is the ordinary way to meet it.
+
+         A fragment that names something outside the scroller is still the
+         browser's: there is no position of this box that answers it. */
+      var wanted = asked ? document.getElementById(asked) : null;
+      if (wanted && !scroller.contains(wanted)) return;
+      wanted = wanted || open;
 
       /* Instant, and from PR 20 it has to say so.
          An assignment to `scrollTop` is not a jump: the setter scrolls with the
@@ -114,7 +128,7 @@ const { scenes, openIndex } = Astro.props;
       var behaviour = scroller.style.scrollBehavior;
       scroller.style.scrollBehavior = 'auto';
       scroller.scrollTop +=
-        open.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+        wanted.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
       scroller.style.scrollBehavior = behaviour;
     })();
   </script>
@@ -364,9 +378,11 @@ const { scenes, openIndex } = Astro.props;
          asking for. */
       var landing = null;
       var settling;
+      var restingAt = null;
 
       function watch(index) {
         landing = index;
+        restingAt = null;
         clearTimeout(settling);
         settling = setTimeout(settle, 800);
       }
@@ -400,6 +416,22 @@ const { scenes, openIndex } = Astro.props;
       }
 
       function settle() {
+        /* Still moving? A gap between two scroll events is not the end of a
+           flight: an animation stalls when the main thread does, and on the
+           four-year-old phone of the test matrix that is the assumption that
+           breaks first. What says «arrived» is the position holding still, so
+           it is sampled twice — a gap apart — before anything is corrected.
+           Cutting a jump short would take away exactly the movement this step
+           exists to add, on the machine where it is hardest to add. */
+        var here = scroller.scrollTop;
+        if (here !== restingAt) {
+          restingAt = here;
+          clearTimeout(settling);
+          settling = setTimeout(settle, 140);
+          return;
+        }
+        restingAt = null;
+
         /* The movement is over, whatever it did, so the observer speaks again.
            This is the clause that lets the mute above outlast a long animation
            without having to guess how long one is. */
@@ -590,17 +622,25 @@ const { scenes, openIndex } = Astro.props;
         // selects, and taking them over answers a request nobody made.
         if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
 
-        /* Every other key that scrolls is the browser's — Space, Tab onto
-           something below the fold — and it is the reader scrolling, so a jump
-           still in flight stops being theirs. */
-        abandon();
-
         var index = null;
         if (event.key === 'Home') index = 0;
         else if (event.key === 'End') index = scenes.length - 1;
         else if (event.key === 'ArrowDown' || event.key === 'PageDown') index = current + 1;
         else if (event.key === 'ArrowUp' || event.key === 'PageUp') index = current - 1;
-        if (index === null) return;
+        if (index === null) {
+          /* The two keys that move this box and are not ours — the space bar,
+             and Tab onto something below the fold. Those are the reader
+             scrolling, so a jump still in flight stops being theirs.
+
+             Named rather than assumed, which is the whole of this clause: read
+             as «any key at all» it took the safety net down for a letter typed
+             while a jump was in the air, and a dropped jump then had nothing
+             left to correct it — the contradiction of PR 9, reopened by the
+             wrong key. The five keys below need no abandoning: `aim()` and
+             `watch()` set the destination again on the same line. */
+          if (event.key === ' ' || event.key === 'Spacebar' || event.key === 'Tab') abandon();
+          return;
+        }
 
         index = Math.max(0, Math.min(scenes.length - 1, index));
         event.preventDefault();

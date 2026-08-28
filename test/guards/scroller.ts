@@ -223,12 +223,32 @@ export function checkBareScrollWrite(source: string, path: string): Violation[] 
     const receiver = match[1] ?? '';
     const from = Math.max(0, match.index - SET_ASIDE_WINDOW);
     const before = source.slice(from, match.index);
-    const aside = new RegExp(
+
+    /* The last one in the window and not the first: two pairs written near each
+       other are legitimate, and the one that belongs to this write is the one
+       just above it. */
+    const pattern = new RegExp(
       String.raw`${receiver.split('.').join(String.raw`\.`)}\.style\.scrollBehavior\s*=\s*(['"\`])auto\1`,
-    ).exec(before);
+      'g',
+    );
+    let aside: RegExpExecArray | null = null;
+    let candidate: RegExpExecArray | null;
+    while ((candidate = pattern.exec(before)) !== null) aside = candidate;
+
+    /* And it has to be *this* write's set-aside: between the two there may be
+       only the semicolon that closes that line, whitespace and comments.
+       Accepted anywhere in a window instead, a second write — animated, and
+       open to the hidden-tab defect — passed by standing near a legitimate
+       pair, which is exactly where somebody adding one would put it. */
+    const between = aside
+      ? before
+          .slice(aside.index + aside[0].length)
+          .replace(/\/\*[\s\S]*?\*\//g, '')
+          .replace(/\/\/[^\n]*/g, '')
+      : '';
 
     // Set aside inside a comment is the rule being described, not applied.
-    if (aside && !inComment(masked, from + aside.index)) continue;
+    if (aside && !inComment(masked, from + aside.index) && /^[\s;]*$/.test(between)) continue;
 
     violations.push({
       rule: 'scroller',
