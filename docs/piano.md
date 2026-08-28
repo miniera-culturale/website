@@ -90,7 +90,7 @@ sostituisce un telefono vero.
 | 18 | Proporzioni su schermo piccolo | `proporzioni-mobile` | fatta |
 | 19 | Controllo qualità | `controllo-qualita` | fatta |
 | 20 | La barra del tempo che sta al centro, e si muove | `timeline-centrata` | fatta |
-| 21 | La rotaia che regge l'archivio | `rotaia-archivio` | da fare |
+| 21 | La rotaia che regge l'archivio | `rotaia-archivio` | fatta |
 | 22 | Il dominio | `dominio` | da fare |
 
 > **E di nuovo alla PR 19**, che è quella che ha guardato il sito su un
