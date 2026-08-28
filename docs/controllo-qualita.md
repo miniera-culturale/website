@@ -203,5 +203,5 @@ senza il quale iOS mette in schermata Home una miniatura della pagina;
 `theme-color`, che colora la barra del browser; `color-scheme`, senza il quale
 la barra di scorrimento del programma arriva chiara su un sito blu notte.
 
-Le anteprime sociali **restano alla PR 20**: senza dominio non c'è niente da
+Le anteprime sociali **restano alla PR 21**: senza dominio non c'è niente da
 incollare in una chat.

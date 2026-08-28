@@ -60,9 +60,9 @@ forte di dirlo. *(PR 17)*
 non toglie un indirizzo dall'indice: dice al crawler di non *leggere* la pagina,
 e una pagina non letta è una pagina il cui `noindex` non si vede mai — quindi
 l'indirizzo nudo può finire in elenco lo stesso. Il `noindex` ce l'hanno già ed
-è quello che funziona; la sitemap della PR 20 è l'altra metà. Il piano diceva il
+è quello che funziona; la sitemap della PR 21 è l'altra metà. Il piano diceva il
 contrario, e oggi non cambierebbe niente perché `Disallow: /` copre tutto: il
-difetto si pubblicherebbe alla PR 20. *(PR 17)*
+difetto si pubblicherebbe alla PR 21. *(PR 17)*
 
 **La CSP si genera dal pubblicato, non si scrive a mano.** Questo sito non ha
 nemmeno uno script esterno: sono tutti `is:inline`, per quattro decisioni
@@ -514,7 +514,7 @@ per come è formattato un file invece che per quello che dice.
 
 **`og:image`, invece, non lo pretende, e non è una svista.** Ha bisogno di
 un'immagine, non di un dominio, e il repository non ne ha una: chiederlo insieme
-a `og:url` avrebbe aperto la PR 20 su una suite rossa che si poteva chiudere
+a `og:url` avrebbe aperto la PR 21 su una suite rossa che si poteva chiudere
 solo inventando un asset che nessuno ha scelto — cioè un test che detta una
 decisione di contenuto. La decisione sta in
 [questioni-aperte.md](questioni-aperte.md); quello che la suite controlla è che
@@ -958,7 +958,7 @@ ciclo viene ritarato nel CMS, indicando un file di test invece del contenuto che
 `CLAUDE.md` dice che per lo stile guardare il sorgente non basta, quindi una
 rassegna viva solo in `npm run dev` lascerebbe le varianti di ogni componente
 verificate da nessuna parte. Fuori dall'indice perché è una pagina di servizio —
-e la sitemap della PR 20 dovrà escluderla. Non `/rassegna`, che è della rassegna
+e la sitemap della PR 21 dovrà escluderla. Non `/rassegna`, che è della rassegna
 stampa della PR 13.
 
 ## Forme di ritaglio, la geometria
@@ -1428,7 +1428,7 @@ mai messo in cache: è qualcuno che chiede di un altro giorno, e rispondergli
 dalla memoria risponderebbe a un'altra domanda. *(PR 9, in revisione)*
 
 **L'immagine da anteprima si genera solo quando c'è il dominio.** Prima si
-generava comunque, con l'argomento che alla PR 20 non ci fosse niente da
+generava comunque, con l'argomento che alla PR 21 non ci fosse niente da
 ricordarsi — e il costo si vedeva in `dist/`: un JPEG per serata che nessuna
 pagina referenziava, cioè ottantuno ridimensionamenti e ottantuno file morti in
 ogni deployment con l'archivio pieno. La promessa regge lo stesso: arriva il
@@ -1562,7 +1562,7 @@ link, e in un menu è una voce che sembra attiva e non lo è — la stessa mezza
 verità dell'`aria-disabled` su un `<a>` senza indirizzo, tolta alla PR 6. È
 testo, con accanto il suo *in arrivo*. E niente pagina: sarebbe un indirizzo
 condivisibile e indicizzabile per qualcosa che non ha niente da dire, più una
-rotta che la sitemap della PR 20 dovrebbe ricordarsi di escludere. *(PR 13)*
+rotta che la sitemap della PR 21 dovrebbe ricordarsi di escludere. *(PR 13)*
 
 **Ogni link interno pubblicato deve trovare la sua pagina in `dist/`**,
 `checkInternalLinks`: la sorella di `checkEveningRoutes`, e il motivo per cui la
@@ -1612,7 +1612,7 @@ rende la sostituzione un file solo invece di una caccia — il componente
 `data-placeholder` che la guardia legge, e con `site` impostato in
 `astro.config.mjs` un solo blocco marcato in `dist/` è una violazione. È
 l'interruttore di `og:url`, armato dalla configurazione e non dalla memoria di
-qualcuno: **la PR 20 non chiude finché i testi veri non ci sono**, ed è voluto —
+qualcuno: **la PR 21 non chiude finché i testi veri non ci sono**, ed è voluto —
 un dominio vero con un lorem ipsum sopra è l'unica cosa peggiore di non avere il
 dominio. *(PR 13)*
 
@@ -1757,7 +1757,7 @@ perché le due si sommano e la classica continuerebbe a bloccare il CMS:
 
 Due e non uno, perché il bypass si dà a un ruleset e non a una regola: con uno
 solo, il team che salva dal CMS potrebbe anche riscrivere la storia di `main`. Il
-bypass è a un **team** e non a un account perché alla PR 20 il CMS entra in OAuth
+bypass è a un **team** e non a un account perché alla PR 21 il CMS entra in OAuth
 e commetta con l'identità di chi ha fatto l'accesso — chi sta in quel team è una
 voce di [questioni-aperte.md](questioni-aperte.md). I ruleset puntano a
 `~DEFAULT_BRANCH` e non a `refs/heads/main`, così seguono il branch predefinito

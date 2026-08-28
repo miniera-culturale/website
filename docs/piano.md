@@ -89,7 +89,14 @@ sostituisce un telefono vero.
 | 17 | Messa in linea | `messa-in-linea` | fatta |
 | 18 | Proporzioni su schermo piccolo | `proporzioni-mobile` | fatta |
 | 19 | Controllo qualità | `controllo-qualita` | fatta |
-| 20 | Il dominio | `dominio` | da fare |
+| 20 | La barra del tempo che sta al centro, e si muove | `timeline-centrata` | da fare |
+| 21 | Il dominio | `dominio` | da fare |
+
+> **E di nuovo alla PR 19**, che è quella che ha guardato il sito su un
+> telefono. La barra del tempo entra come 20 e il dominio scala a 21: il numero
+> di un passo è il numero della sua PR, quindi un passo nuovo si infila
+> nell'elenco e non lo scavalca. Il dominio dipende dal committente e non da
+> noi, quindi lo spostamento non costa niente a nessuno.
 
 > **La coda è cambiata alla PR 16.** Era «16 Pubblicazione, 17 Proporzioni»: un
 > passo solo teneva insieme il collegamento a Cloudflare Pages, che non dipende
@@ -684,7 +691,7 @@ In breve:
 - Ogni pagina porta tutte le forme che il componente dichiara, e nessun `id`
   italiano dell'export arriva in `dist/`
 - I meta Open Graph di base ci sono, e **`og:url` e `og:image` sono pretesi
-  appena `site` è impostato**: il test si accende da solo alla PR 20
+  appena `site` è impostato**: il test si accende da solo alla PR 21
 - Il salta-a è il primo link del `<body>` e punta a un `id` che esiste — non a
   uno che gli somiglia: `#programma` non è soddisfatto da `id="programma-2"`,
   ed è il primo difetto che il caso negativo ha trovato nella guardia appena
@@ -715,7 +722,7 @@ In breve:
 > alle guardie del documento anche le pagine copiate da `public/`, cioè la
 > PR 14 non avrebbe potuto chiudere verde con la shell di Sveltia in
 > `public/admin/`; e pretendere `og:image` all'arrivo del dominio avrebbe aperto
-> la PR 20 su una suite rossa chiudibile solo inventando un'immagine che nessuno
+> la PR 21 su una suite rossa chiudibile solo inventando un'immagine che nessuno
 > ha scelto. L'immagine è una questione aperta, non un test.
 
 ### Test manuali
@@ -1350,7 +1357,7 @@ breve:
 - Ogni rotta pubblica titolo e descrizione della sua serata, non del sito, e
   `og:description` dice la stessa cosa del meta
 - **Quando `site` è impostato**, ogni rotta con una foto pubblica `og:image`
-  assoluto: scritto ora, si accende alla PR 20
+  assoluto: scritto ora, si accende alla PR 21
 - Gli `<h1>` di due rotte sono diversi, e quello della radice non nomina nessuna
   serata
 - **Guardia** `checkEveningRoutes`: ogni `data-number` pubblicato trova la sua
@@ -1430,14 +1437,14 @@ breve:
 > **l'immagine da anteprima si generava anche senza dominio**, cioè un JPEG per
 > serata che nessuna pagina referenziava. Con l'archivio pieno sono ottantuno
 > ridimensionamenti e ottantuno file morti in ogni deployment. Generarla solo
-> quando c'è il dominio non toglie niente alla promessa che alla PR 20 non ci
+> quando c'è il dominio non toglie niente alla promessa che alla PR 21 non ci
 > sia niente da ricordarsi: arriva il dominio e arrivano le immagini.
 >
 > **Due sono rimaste aperte, di proposito.** Il `<title>` di una serata non
 > nomina l'associazione, mentre quello della radice sì: è una scelta di testo
 > italiano e la si fa guardandola, non correggendola di nascosto. E `og:type`
 > resta `website` anche sulle rotte delle serate: cambiarlo è una decisione sul
-> layout condiviso, e il posto dove si prende è la PR 20, insieme al resto dei
+> layout condiviso, e il posto dove si prende è la PR 21, insieme al resto dei
 > meta.
 
 ### Test manuali
@@ -1455,7 +1462,7 @@ breve:
   20–25 KB di [vincoli-tecnici.md](vincoli-tecnici.md) — e 109 file in tutto,
   contro i 20.000 che Cloudflare Pages concede per deployment
 
-> **Rimandata alla PR 20**: l'anteprima di un link su WhatsApp e su Facebook.
+> **Rimandata alla PR 21**: l'anteprima di un link su WhatsApp e su Facebook.
 > Senza dominio non c'è niente da incollare in una chat e `og:image` non viene
 > emesso — il layout lo omette apposta, perché un URL relativo lì dentro
 > «sembra giusto nel markup e l'anteprima esce senza figura». Il test è scritto
@@ -1965,7 +1972,7 @@ breve:
   scritta per le foto. Lo copia la build, e un test confronta i byte pubblicati
   con quelli installati. `@sveltia/cms` passa quindi fra le `dependencies`
 - **L'accesso in questa PR è con token personale**, e l'OAuth entra fra gli
-  obiettivi della PR 20: ha bisogno di un'origine registrata su GitHub e di un
+  obiettivi della PR 21: ha bisogno di un'origine registrata su GitHub e di un
   relay, e l'origine non esiste finché il sito non è pubblicato
 - **Il fuso si dichiara nel CMS** — `input_timezone: Europe/Rome`,
   `output_utc: false`, `format: YYYY-MM-DDTHH:mm:ssZ` — con la sua guardia
@@ -2338,7 +2345,7 @@ L'ordine è vincolante e non è pignoleria: è **questa PR** a installare la Git
 App di Cloudflare, a creare il progetto Pages e a mettere il secret del deploy
 hook, e tutti e tre sono legati all'account che possiede il repository.
 [questioni-aperte.md](questioni-aperte.md) dice che il trasferimento va fatto
-«prima della PR 20» e sbaglia per difetto di tre passi: dopo la 17 significa
+«prima della PR 21» e sbaglia per difetto di tre passi: dopo la 17 significa
 rifare il progetto, il collegamento e il secret, che è esattamente il costo che
 quella voce voleva evitare.
 
@@ -2366,7 +2373,7 @@ nessun `.env`, nessun token. Non c'è niente da riscrivere prima di pubblicare, 
   pubblico e scansionabile — a differenza dei deploy preview, che Cloudflare
   marca da sé — e il giorno del dominio ci sarebbero due siti identici con il
   motore a sceglierne uno. Finché `site` non c'è, `robots.txt` vieta tutto; alla
-  PR 20 si inverte e prende il rimando alla sitemap. La guardia legge la stessa
+  PR 21 si inverte e prende il rimando alla sitemap. La guardia legge la stessa
   riga di configurazione e pretende l'una o l'altra cosa: è l'interruttore di
   `og:url` applicato all'indicizzazione.
 - **Ma `/admin` e `/componenti` non si vietano in `robots.txt`, e questo cambia
@@ -2377,10 +2384,10 @@ nessun `.env`, nessun token. Non c'è niente da riscrivere prima di pubblicare, 
   (`componenti.astro` per decisione della PR 6, `public/admin/index.html` per
   decisione della PR 14), ed è quello il meccanismo che funziona: vietarle in
   `robots.txt` lo spegnerebbe. Oggi non cambia niente, perché `Disallow: /` copre
-  tutto; cambia alla PR 20, che è il momento in cui il difetto si pubblicherebbe.
+  tutto; cambia alla PR 21, che è il momento in cui il difetto si pubblicherebbe.
   Quindi la guardia pretende **le due cose insieme**: il divieto generale
   concorde con `site`, e in nessuno dei due stati un `Disallow` su quelle due
-  pagine. La sitemap le esclude, che è l'altro modo giusto, e sta alla PR 20.
+  pagine. La sitemap le esclude, che è l'altro modo giusto, e sta alla PR 21.
 - **La CSP si genera dal pubblicato, non si scrive a mano.** Questo sito ha
   **cinque blocchi in linea** — lo script che toglie `no-js` in `Base.astro`,
   quello di `Modal.astro`, i due di `Programme.astro`, e lo `<style is:inline>`
@@ -2404,7 +2411,7 @@ nessun `.env`, nessun token. Non c'è niente da riscrivere prima di pubblicare, 
   quindi è anche il punto dove una CSP sbagliata rompe il CMS in silenzio, e la
   prova è un salvataggio vero, non un'occhiata al file.
 - **Niente HSTS qui.** `Strict-Transport-Security` è una promessa a scadenza
-  lunga fatta su un indirizzo che alla PR 20 verrà abbandonato. Arriva col
+  lunga fatta su un indirizzo che alla PR 21 verrà abbandonato. Arriva col
   dominio, insieme a tutto il resto che dipende da `site`.
 - **La 404 entra qui.** Un indirizzo sbagliato esiste dal primo giorno in cui il
   sito è in linea, non dal giorno del dominio — e su un sito dove il numero *è*
@@ -2439,7 +2446,7 @@ nessun `.env`, nessun token. Non c'è niente da riscrivere prima di pubblicare, 
 - **E la guardia sul sorgente chiede che la dichiarazione punti ancora a
   qualcosa, non che ogni foto sia dichiarata.** Scrivendola era «una foto in
   `src/assets/photos/` che nessuno ha marcato è una violazione», e sarebbe stata
-  una guardia che alla PR 20 segnala le fotografie vere dell'associazione — una
+  una guardia che alla PR 21 segnala le fotografie vere dell'associazione — una
   guardia che scatta su un lavoro giusto è la forma che qualcuno spegne, e
   spegnendola porterebbe via anche le due che servono. Quello che invece è
   invisibile è il caso opposto: un nome cambiato lascia `checkPlaceholderPhotos`
@@ -2473,7 +2480,7 @@ nessun `.env`, nessun token. Non c'è niente da riscrivere prima di pubblicare, 
   bypass al team `redazione`. Con un ruleset solo, dare il bypass al CMS gli
   regalerebbe anche il force push su `main`.
 
-  **Il bypass è a un team e non a un account**, perché alla PR 20 il CMS entra in
+  **Il bypass è a un team e non a un account**, perché alla PR 21 il CMS entra in
   OAuth e commetta con l'identità di chi ha fatto l'accesso: un account «della
   redazione» sarebbe una credenziale condivisa da ritirare fra tre passi. E **la
   protezione classica va cancellata**, non lasciata lì: classica e ruleset si
@@ -2499,12 +2506,12 @@ nessun `.env`, nessun token. Non c'è niente da riscrivere prima di pubblicare, 
   diventa vera il giorno che il redattore è un account suo dentro quel team, e
   quel giorno chi ha costruito il sito esce dal team.
 - **`site_url` nel `config.yml` del CMS resta commentato.** `pages.dev` è un
-  indirizzo che muore alla PR 20: puntarci il CMS vuol dire un collegamento «vedi
+  indirizzo che muore alla PR 21: puntarci il CMS vuol dire un collegamento «vedi
   il sito» che il giorno del dominio porta al posto sbagliato, e non fallisce da
   nessuna parte. È lo stesso ragionamento di `site`, applicato al file accanto.
 - **I tre «PR 15» in `public/admin/config.yml` puntano al passo sbagliato.** La
   PR 16 ha rinumerato cinquantacinque riferimenti e ha spazzato `src/`, `test/` e
-  `docs/`, non `public/`. Due parlano del dominio e dell'OAuth, che sono la PR 20;
+  `docs/`, non `public/`. Due parlano del dominio e dell'OAuth, che sono la PR 21;
   il terzo parla del deploy preview, che è **questa** e che diventa vera col
   merge. È lo stesso difetto che la PR 16 ha corretto altrove, sopravvissuto in
   una cartella che nessuno pensa a guardare perché non sembra codice.
@@ -2561,7 +2568,7 @@ nessun `.env`, nessun token. Non c'è niente da riscrivere prima di pubblicare, 
       `/admin` e su `/admin/`
 - [x] `decisioni.md` dice repository pubblico e cron alle 01:00 UTC, con le
       ragioni; `questioni-aperte.md` chiude la voce sulla proprietà e corregge il
-      «prima della PR 20»
+      «prima della PR 21»
 - [x] I tre «PR 15» del `config.yml` e la riga 16 della tabella dicono la cosa
       giusta
 
@@ -2585,7 +2592,7 @@ nessun `.env`, nessun token. Non c'è niente da riscrivere prima di pubblicare, 
   l'asserzione che oggi in quella cartella non ce ne sono altre — e la metà
   anti-vacuità sulle pagine vere: con `site` acceso la guardia **deve** trovarne
   due, altrimenti quello che passa oggi passerebbe identico puntata sul nome
-  sbagliato. Si ritira da sé alla PR 20, quando l'elenco si svuota
+  sbagliato. Si ritira da sé alla PR 21, quando l'elenco si svuota
 - `checkInternalLinks` copre anche la 404, che è la pagina da cui è più facile
   scrivere un link a niente
 - **Guardia** sulle sorgenti che il bundle del CMS scarica da fuori: la policy
@@ -3045,7 +3052,7 @@ aperto mentre si scorre.
   leggibile su 3G, con caratteri, immagine e i 200 KB di markup che l'archivio
   pieno avrà
 
-Le anteprime sociali **restano alla PR 20**: senza dominio non c'è niente da
+Le anteprime sociali **restano alla PR 21**: senza dominio non c'è niente da
 incollare in una chat.
 
 ### Cosa entra in questa PR e cosa no
@@ -3134,7 +3141,105 @@ percorsi sulla matrice e scritti nel verbale.
 
 ---
 
-## PR 20 — Il dominio
+## PR 20 — La barra del tempo che sta al centro, e si muove
+
+**Branch:** `timeline-centrata` · **Dipende da:** 19
+
+Due difetti trovati dal committente guardando la barra su un telefono, che è lo
+stesso posto da cui è arrivata la PR 11: la serata corrente non resta al centro,
+e premere una tacca non produce nessun movimento — le cose cambiano di scatto e
+sembrano non essere successe.
+
+### La serata corrente non può stare al centro, e il motivo è aritmetico
+
+Misurato sull'anteprima della PR 19, a 390 px di larghezza con sette serate:
+
+| Serata a schermo | Scarto dal centro della barra | `scrollLeft` |
+|---|---|---|
+| la terza | −6 px | 0 |
+| la quinta | +17 px | al massimo |
+| **la prima** | **−184 px** | 0, non può scorrere oltre |
+| **l'ultima** | **+188 px** | al massimo, non può scorrere oltre |
+
+`reveal()` fa il calcolo giusto — porta la tacca al centro della barra — e poi
+il browser lo tronca, perché **oltre il bordo non c'è niente su cui scorrere**.
+La striscia comincia con la prima tacca e finisce con l'ultima, quindi per
+centrarle servirebbe metà barra di spazio vuoto prima e dopo, che non c'è.
+
+Con l'archivio pieno il difetto non sparisce: si sposta. Le serate nel mezzo si
+centrano, le prime e le ultime no — e **la serata su cui il sito si apre è la
+prossima futura**, cioè quasi sempre l'ultima o la penultima dell'elenco. Il
+caso che sbaglia è il caso normale.
+
+Il rimedio è dare alla striscia lo spazio che le manca: un padding laterale di
+metà barra, o `scroll-padding` con `scroll-snap-align: center` sulle tacche. Con
+il padding, `reveal()` può restare l'aritmetica che è già.
+
+### Le animazioni: quali si aggiungono e quale non si tocca
+
+Quello che oggi si muove: il colore di una tacca, la sua misura, la larghezza
+del segno, il fondo della pillola corrente — tutte transizioni CSS che ci sono
+già. Quello che **non** si muove è lo scorrimento della barra: `reveal()` scrive
+`scrollLeft +=`, e un'assegnazione diretta a `scrollLeft` è istantanea per
+specifica, qualunque cosa dica il foglio di stile. È lì che sta la sensazione
+che non succeda niente: la barra si riposiziona di colpo mentre la pagina salta.
+
+Si aggiungono, e nessuna tocca una decisione presa:
+
+- **lo scorrimento della barra**, passando da `scrollLeft +=` a `scrollTo({ left })`
+  **senza `behavior`**, con `scroll-behavior: smooth` dichiarato su
+  `[data-timeline]` nel foglio di stile. È la forma che il messaggio di
+  `checkSmoothScrollArgument` prescrive con queste parole: *«Declare
+  scroll-behavior: smooth in the stylesheet and call the scroll with no behavior
+  at all»*. Passa da sola sotto `prefers-reduced-motion`, perché `global.css`
+  dichiara `scroll-behavior: auto !important`;
+- **la pressione**, che sul telefono è l'unico riscontro che il dito ha ricevuto:
+  `:active` sulla tacca, che è l'unico stato che questo design system possiede;
+- **l'arrivo**, cioè la pillola che prende la sua forma nella nuova posizione:
+  già transizionata, ma va guardata mentre la barra si muove sotto.
+
+**Non si tocca il salto alla serata.** Resta istantaneo, ed è la regola 15: un
+salto animato è interrompibile, un secondo salto partito mentre il primo è in
+volo viene lasciato cadere dal motore, e quello che resta è la pagina su una
+serata mentre rotaia, accento e indirizzo ne dicono un'altra. La PR 8 l'aveva
+spedito, la PR 9 l'ha riprodotto e tolto. **Se quello che il committente vuole è
+proprio lo scorrimento animato della pagina, quella è una decisione da rivedere
+con una ragione nuova, e va discussa prima** — non è una taratura di questo
+passo. Due tacche toccate a due decimi di distanza sono ancora la prova che
+serve a smontarla.
+
+### Obiettivi
+
+- [ ] La serata corrente sta al centro della barra a ogni posizione
+      dell'archivio, prima e ultima comprese — misurato, non guardato
+- [ ] La barra scorre con un movimento visibile invece che di scatto, e sotto
+      `prefers-reduced-motion` torna istantanea
+- [ ] Premere una tacca dà un riscontro immediato al dito
+- [ ] Il salto alla serata resta istantaneo, e `checkSmoothScrollArgument` resta
+      verde
+- [ ] Le righe della matrice che riguardano la barra sono ripercorse su un
+      telefono vero
+
+### Test automatici
+
+- **Guardia**: la striscia dichiara lo spazio che permette a una tacca di
+  arrivare al centro — letta sul CSS pubblicato, perché è una misura che il
+  minificatore tocca
+- **Guardia**: `reveal()` non assegna `scrollLeft` direttamente, che è la forma
+  che nessun foglio di stile può raggiungere — è `checkSmoothScrollArgument` al
+  contrario, e vale la stessa ragione
+- La suite intera e `npm run test:mutate` restano verdi
+
+### Test manuali
+
+Su un telefono vero, che è da dove il difetto è arrivato: la prima serata
+dell'archivio, l'ultima, e una nel mezzo; il movimento della barra premendo una
+tacca lontana; la pressione con il dito; e lo stesso giro con la riduzione del
+movimento attiva.
+
+---
+
+## PR 21 — Il dominio
 
 **Branch:** `dominio` · **Dipende da:** 17, 19 — e dal committente
 

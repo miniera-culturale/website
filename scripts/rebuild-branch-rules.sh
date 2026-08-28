@@ -28,7 +28,7 @@
 # single one, the team that can save from the CMS could also rewrite the history
 # of `main`.
 #
-# **Why the bypass names a team and not an account.** At PR 20 the CMS signs in
+# **Why the bypass names a team and not an account.** At PR 21 the CMS signs in
 # through OAuth and commits as whoever signed in, so an account "for the
 # editors" would be a shared credential to hand out now and withdraw then.
 #
