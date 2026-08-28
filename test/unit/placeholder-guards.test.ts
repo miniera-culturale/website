@@ -209,7 +209,7 @@ describe('checkDeclaredPhotos', () => {
   });
 
   it('says nothing when nothing is declared', () => {
-    // Which is what PR 21 leaves behind: the real photographs arrive, the list
+    // Which is what the domain step leaves behind: the real photographs arrive, the list
     // empties, and both guards go quiet because there is nothing to watch.
     expect(checkDeclaredPhotos([], ['sala-vera.jpg'])).toEqual([]);
   });

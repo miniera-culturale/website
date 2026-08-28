@@ -42,7 +42,7 @@ la regola 21 del [CLAUDE.md](../CLAUDE.md).
 [token]`. Il bottone «Sign in with GitHub», che è la via per chi non sa cos'è un
 token, ha bisogno di un'applicazione OAuth registrata su un'origine e di un
 relay che ne tenga il segreto: l'origine è il sito pubblicato, quindi arriva con
-il dominio alla PR 21.
+il dominio alla PR 22.
 
 **L'interfaccia del CMS è in inglese**: Sveltia ha diciassette traduzioni e
 nessuna italiana. Italiane sono le etichette e gli aiuti dei campi, che sono
@@ -83,7 +83,7 @@ applicate insieme, e il CMS non salverebbe.
 
 `public/robots.txt` invece è scritto a mano, e dice l'opposto di quel che dirà:
 finché non c'è un dominio vieta tutto, perché il `pages.dev` di produzione è
-pubblico e scansionabile. Si rovescia alla PR 21, e a leggere da che parte
+pubblico e scansionabile. Si rovescia alla PR 22, e a leggere da che parte
 dell'interruttore siamo è una guardia e non una memoria.
 
 Il rebuild notturno è `.github/workflows/rebuild.yml`, che chiama un deploy hook

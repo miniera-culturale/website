@@ -37,7 +37,7 @@ describe('checkRobotsIndexing', () => {
   });
 
   it('reports a file that still forbids everything once the domain is set', () => {
-    // PR 21 is one line in astro.config.mjs, and this is the file that would
+    // Setting the domain is one line in astro.config.mjs, and this is the file that would
     // otherwise stay shut behind it — a published site nobody can find.
     const violations = checkRobotsIndexing(CLOSED, { withDomain: true });
     expect(violations.map((v) => v.rule)).toEqual(['robots', 'robots']);
@@ -75,7 +75,7 @@ describe('checkRobotsIndexing', () => {
 
   it('reports those two on the closed side of the switch as well', () => {
     // The rule does not flip with the domain: a `Disallow: /admin` written
-    // today survives the inversion of PR 21 and becomes wrong there.
+    // today survives the inversion the domain brings and becomes wrong there.
     const violations = checkRobotsIndexing(`${CLOSED}Disallow: /componenti\n`, {
       withDomain: false,
     });
@@ -86,7 +86,7 @@ describe('checkRobotsIndexing', () => {
   it('does not read the prose that explains it', () => {
     // A guard that fires on the comment describing it is a guard somebody
     // switches off. `#` starts a comment in robots.txt.
-    const commented = `# Alla PR 21 questo file si rovescia. Non scrivere Disallow: /admin qui.\n${CLOSED}`;
+    const commented = `# Col dominio questo file si rovescia. Non scrivere Disallow: /admin qui.\n${CLOSED}`;
     expect(checkRobotsIndexing(commented, { withDomain: false })).toEqual([]);
   });
 
