@@ -15,6 +15,7 @@ import {
   checkDocumentChrome,
   checkOpenGraph,
   checkSceneTitles,
+  checkThemeColour,
   checkSkipLink,
   checkSkipLinkStyle,
 } from '../guards/document.ts';
@@ -36,6 +37,11 @@ import {
 import astroConfig from '../../astro.config.mjs';
 
 const pages = publishedPages();
+/* Every file that was published, so a link can be checked for landing on one,
+   and the stylesheet, so a colour written in the markup can be checked against
+   the token it copies. */
+const published = listPublishedFiles().map((path) => path.replace(/^dist[\\/]/, ''));
+const css = readPublishedCss();
 
 /* Every address dist/ actually answers: a page, or a file copied beside it.
    Built from what the build produced and not from a list written here — a
@@ -83,7 +89,17 @@ describe('every published page', () => {
   it.each(pages.map((page) => [page.path, page] as const))(
     '%s carries the three things only an eye catches: theme-color, color-scheme, apple-touch-icon',
     (_path, page) => {
-      expect(checkDocumentChrome(page.html, page.path)).toEqual([]);
+      // The published file list is passed in so that the touch icon is checked
+      // for being *there* and not only for being named: an href at a file
+      // nobody publishes leaves iOS doing exactly what this guard is about.
+      expect(checkDocumentChrome(page.html, page.path, published)).toEqual([]);
+    },
+  );
+
+  it.each(pages.map((page) => [page.path, page] as const))(
+    '%s paints the browser bar the colour the page is actually painted in',
+    (_path, page) => {
+      expect(checkThemeColour(page.html, css, page.path)).toEqual([]);
     },
   );
 

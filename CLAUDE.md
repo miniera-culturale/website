@@ -512,7 +512,7 @@ npm run preview      # anteprima della build
 npm test             # guardie e test, con una build dentro
 npm run test:mutate  # acceca ogni guardia a turno e pretende che la suite se
                      # ne accorga — due minuti, la gira la CI a fette. È la
-                     # suite intera una volta per guardia, e le guardie sono 78:
+                     # suite intera una volta per guardia, e le guardie sono 79:
                      # ciò che è cambiato è che le corse vanno in parallelo,
                      # non che ne giri una parte
 npm run check        # astro check, typecheck

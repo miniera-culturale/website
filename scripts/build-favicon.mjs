@@ -26,16 +26,22 @@ export const faviconTarget = join(root, 'public', 'favicon.ico');
    the page and shrinks it, which on a site that opens on a full-screen scene is
    a blue smudge — found at PR 19, on a phone. 180×180 is what current iPhones
    ask for, and one size is enough: iOS downscales, and the drawing is three
-   rectangles. PNG and not SVG, which iOS still does not take here, and opaque
-   because a transparent one is composited onto black. The tile already carries
-   its own blue ground, so nothing has to be added underneath. */
+   rectangles. PNG and not SVG, which iOS still does not take here.
+
+   `cover` and not `contain`, which is what it was: iOS composites a
+   transparent icon onto black, and `contain` pads a drawing that is not square
+   with transparency — so the day the tile stops being square the Home screen
+   gets two black bands. `cover` crops instead, which on a square drawing is
+   the same picture and on any other is still an icon. The alternative was to
+   flatten onto a colour, and that would have been the ground written out a
+   second time. */
 export const appleIconTarget = join(root, 'public', 'apple-touch-icon.png');
 export const APPLE_ICON_SIZE = 180;
 
 /** The apple-touch-icon the given drawing produces, as bytes. Writes nothing. */
 export async function buildAppleTouchIcon(source = faviconSource) {
   return sharp(source, { density: 384 })
-    .resize(APPLE_ICON_SIZE, APPLE_ICON_SIZE, { fit: 'contain' })
+    .resize(APPLE_ICON_SIZE, APPLE_ICON_SIZE, { fit: 'cover' })
     .png({ compressionLevel: 9 })
     .toBuffer();
 }

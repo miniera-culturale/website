@@ -30,6 +30,10 @@ import { CLIP_SHAPES } from '../lib/shapes.ts';
 import { PLACEHOLDER_IMAGES, PLACEHOLDER_TEXTS } from '../lib/placeholder.ts';
 import { loadProgramme } from '../lib/programme.ts';
 import { fullAddress } from '../lib/venues.ts';
+/* The shell of the institutional pages, because one of the variants shown here
+   is the frame `.page-frame` gives a Placeholder — and without this import the
+   gallery was rendering that variant without the thing it exists to show. */
+import '../styles/pages.css';
 
 const { scenes } = await loadProgramme();
 

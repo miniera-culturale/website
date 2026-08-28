@@ -237,6 +237,16 @@ const { scenes, openIndex } = Astro.props;
         var name = scenes[index].getAttribute('data-title');
         if (name) document.title = name;
 
+        /* And the evening the reader is actually on, said in the markup so
+           that a stylesheet can ask. `data-open` cannot answer it: the build
+           writes it once, on the evening the route opens at, and nothing moves
+           it — so print.css was putting the opening evening on paper while the
+           reader was looking at another one. With no script running there is
+           no `data-current` anywhere and the opening evening is the one on
+           screen, which is what the print sheet falls back to. */
+        for (var s = 0; s < scenes.length; s++) scenes[s].removeAttribute('data-current');
+        scenes[index].setAttribute('data-current', 'true');
+
         var number = scenes[index].getAttribute('data-number');
         if (number && history.replaceState) {
           try {
@@ -356,6 +366,15 @@ const { scenes, openIndex } = Astro.props;
         event.preventDefault();
         aim(index);
         scenes[index].scrollIntoView();
+
+        /* And the focus, which the browser would have moved itself: following
+           an anchor sets the point the next Tab starts from, and preventing
+           the default took that away — a keyboard pressing Enter on a tick
+           landed on the evening and went on tabbing through the rail. The
+           scene takes `tabindex="-1"` for this and stays out of the tab order.
+           `preventScroll` because the scrolling is already done, and asking
+           for it twice is how a jump ends up somewhere else. */
+        scenes[index].focus({ preventScroll: true });
       });
 
       /* The wheel over the rail, which was doing nothing at all.
@@ -391,8 +410,16 @@ const { scenes, openIndex } = Astro.props;
              A trackpad sends a burst of these, so a gesture is one jump: the
              gate is time and not distance, because the number of events in a
              flick is a property of the device and its duration is not. */
-          if (event.timeStamp - lastWheel < 220) return;
+          /* The gate closes on the whole burst and not on its first event: a
+             trackpad sends one every sixteen milliseconds for as long as the
+             hand moves, so comparing against the last *jump* let one through
+             every 220 ms — nine evenings in two seconds, while the comment
+             promised one per gesture. Compared against the last *event*, a
+             gesture is one jump however long it lasts, and the next one needs
+             a pause to start. */
+          var inTheSameGesture = event.timeStamp - lastWheel < 220;
           lastWheel = event.timeStamp;
+          if (inTheSameGesture) return;
 
           var next = current + (event.deltaY > 0 ? 1 : -1);
           if (next < 0 || next >= scenes.length) return;

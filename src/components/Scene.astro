@@ -82,6 +82,7 @@ const BOOKING_LABEL = 'Prenota il posto';
   data-title={eveningTitle(scene)}
   data-open={open ? 'true' : undefined}
   aria-labelledby={titleId}
+  tabindex="-1"
 >
   <div class="scene-text">
     <div class="scene-heading">
@@ -816,37 +817,38 @@ const BOOKING_LABEL = 'Prenota il posto';
     }
   }
 
-  /* Un telefono girato di lato, e la composizione cambia invece di stringersi.
+  /* A phone held sideways, where the composition changes instead of tightening.
    *
-   * Sotto i 480 px di altezza utile le soglie tarate alla PR 18 si accavallano
-   * tutte insieme: la fotografia sopra il testo lascia al testo poco più di
-   * cento pixel, e a 800×360 il riquadro ne ritagliava centosettantatré — con
-   * dentro la data, la sede, i bottoni e la nota, cioè tutto quello per cui uno
-   * apre la pagina. Misurato alla PR 19, e il piano lo dice: quello che serve è
-   * una composizione diversa, non un numero ritoccato.
+   * Under 480 px of usable height every threshold tuned at PR 18 piles up at
+   * once: the picture above the text leaves the text a little over a hundred
+   * pixels, and at 800×360 the box was clipping a hundred and seventy-three of
+   * them — with the date, the venue, the buttons and the note inside, which is
+   * everything one opens the page for. Measured at PR 19, and the plan says it:
+   * what this wants is a different composition, not a retuned number.
    *
-   * La composizione è quella del desktop, che per un telefono orizzontale è
-   * semplicemente la forma giusta: il testo a sinistra e la fotografia accanto,
-   * su una riga sola. La fotografia resta — è la decisione della PR 18 — e
-   * prende la colonna che in verticale non c'era. */
+   * The composition is the desktop's, which for a phone on its side is simply
+   * the right shape: the text on the left and the picture beside it, on one
+   * row. The picture stays — that is PR 18's decision — and takes the column it
+   * did not have upright. */
   @media (max-width: 900px) and (max-height: 480px) and (orientation: landscape) {
     .scene {
-      /* Più larga della proporzione del desktop, e non per gusto: qui una riga
-         di titolo in meno vale ventidue pixel di altezza, che è la moneta
-         scarsa. La fotografia resta e resta leggibile. */
-      grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.7fr);
+      /* Wider than the desktop's proportion, and not for taste: one line of
+         title less is worth twenty-two pixels of height here, which is the
+         scarce currency. The picture stays, and stays readable. */
+      grid-template-columns: minmax(0, 1.9fr) minmax(0, 0.6fr);
       grid-template-rows: minmax(0, 1fr);
       align-content: safe center;
       gap: var(--space-4);
-      /* A destra il posto della rotaia, che qui torna colonna, e in basso
-         soltanto un respiro: sono i 78 px che la barra si prendeva. */
-      padding: calc(var(--nav-bar) + var(--space-1))
-        calc(var(--timeline-width) + var(--space-3)) var(--space-3)
-        var(--gutter-page);
+      /* The bar's own height at the foot, as upright, and the gutter at the
+         sides: what changes here is the composition, not where the rail is.
+         Both sums are the shorter ones the tokens declare for a screen this
+         low. */
+      padding: calc(var(--nav-bar) + var(--space-1)) var(--gutter-page)
+        calc(var(--timeline-bar) + var(--space-1));
     }
 
-    /* Sopra il testo in verticale, accanto ad esso qui: `order` torna a zero,
-       che è l'ordine del markup. */
+    /* Above the text upright, beside it here: `order` goes back to zero, which
+       is the order of the markup. */
     .scene-photo {
       order: 0;
     }
@@ -856,10 +858,10 @@ const BOOKING_LABEL = 'Prenota il posto';
       height: 88%;
     }
 
-    /* Il titolo scende di un gradino: in orizzontale la colonna del testo è
-       metà schermo, e i 28 px del verticale ci arrivano su tre righe. */
+    /* The title comes down a step: sideways the text column is half the
+       screen, and the 28 px of upright arrive there on three lines. */
     .scene-title {
-      font-size: clamp(1.125rem, 3.2vw, 1.375rem);
+      font-size: clamp(1.0625rem, 2.6vw, 1.1875rem);
     }
 
     .scene-text {
@@ -868,7 +870,10 @@ const BOOKING_LABEL = 'Prenota il posto';
 
     .scene-meta {
       gap: var(--space-1);
-      padding-top: var(--space-1);
+      /* The hairline above the facts goes, and the space it stood off: the last
+         few pixels, and a line is not information. */
+      padding-top: 0;
+      border-top: 0;
     }
 
     .scene-guests {
@@ -878,33 +883,42 @@ const BOOKING_LABEL = 'Prenota il posto';
       gap: var(--space-1);
     }
 
-    .scene-actions {
-      gap: var(--space-1);
+    /* Side by side rather than stacked, which is where the last thirty pixels
+       come from: the button and the note are one line each and the note is
+       short. Nothing is made smaller — the button keeps the size a thumb needs
+       — the two just stop queuing. The evening that was already fitting is the
+       cancelled one, which has no button: that is what said the button was the
+       piece that did not fit. */
+    .scene-actions,
+    .scene-meta {
+      flex-flow: row wrap;
+      align-items: center;
+      gap: var(--space-1) var(--space-4);
     }
   }
 
-  /* E sotto i 420 px cede anche la fila dei relatori, che è una decisione nuova
-     e non una taratura: fino alla PR 18 l'unica cosa che cedeva era la
-     descrizione, perché era l'unica ripetuta per intero altrove. Qui non basta
-     — a 800×360 la serata con due relatori e le registrazioni chiedeva
-     centosettanta pixel più di quelli che ci sono, e quello che restava fuori
-     erano la data, la sede e i bottoni: cioè le tre cose per cui uno apre la
-     pagina, contro dei nomi che la stessa serata ripete sulla sua pagina e che
-     un telefono girato di lato può ritrovare girandolo di nuovo.
-     Scritta in decisioni.md, perché l'ordine di ciò che cede è una decisione di
-     prodotto e non una misura. */
+  /* And under 420 px the row of guests gives way too, which is a new decision
+     and not a tuning: until PR 18 the only thing that gave way was the
+     description, because it was the only one repeated in full elsewhere. Here
+     that is not enough — at 800×360 the evening with two guests and the
+     recordings asked for a hundred and seventy pixels more than there are, and
+     what stayed outside were the date, the venue and the buttons: the three
+     things one opens the page for, against names the same evening repeats on
+     its own page and that a phone held sideways can find again by turning it
+     back. Written in decisioni.md, because the order of what gives way is a
+     product decision and not a measurement. */
   @media (max-width: 900px) and (max-height: 420px) and (orientation: landscape) {
     .scene-guests {
       display: none;
     }
 
-    /* Con i relatori restavano quarantadue pixel di troppo, e vengono da qui.
-       L'intestazione è il nome del ciclo, il formato e lo stato: il ciclo lo
-       dice già l'accento di tutta la schermata, il formato e lo stato li dice
-       la pagina della serata. La sede torna su una riga, che è la forma che
-       aveva prima della PR 18 e che qui non ha lo spazio per essere migliore.
-       Quello che resta è l'elenco che il piano dichiara: titolo, data, luogo,
-       bottoni, nota. */
+    /* With the guests gone there were still forty-two pixels too many, and
+       they come from here. The heading is the cycle's name, the format and the
+       state: the cycle is already said by the accent of the whole screen, and
+       the format and the state are said by the evening's own page. The venue
+       goes back onto one line, which is the shape it had before PR 18 and which
+       here has no room to be better. What is left is the list the plan
+       declares: title, date, place, buttons, note. */
     .scene-heading {
       display: none;
     }

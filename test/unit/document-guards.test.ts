@@ -16,6 +16,7 @@ import {
   elementsWith,
   checkDocumentChrome,
   checkSceneTitles,
+  checkThemeColour,
 } from '../guards/document.ts';
 
 const HEAD =
@@ -452,5 +453,58 @@ describe('checkSceneTitles', () => {
       { path: '81/index.html', markup: '<html><head><title>Serata 81 — Chi tiene aperto il quartiere</title></head><body></body></html>' },
     ];
     expect(checkSceneTitles(pages)[0]?.detail).toContain('two names');
+  });
+});
+
+describe('checkDocumentChrome, on the files that were published', () => {
+  const pagina = `<html><head>
+    <meta name="theme-color" content="#003049" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  </head><body></body></html>`;
+
+  it('says nothing when the icon it names was published', () => {
+    expect(checkDocumentChrome(pagina, 'x', ['apple-touch-icon.png', 'index.html'])).toEqual([]);
+  });
+
+  it('fires when the icon is named and nobody published it', () => {
+    const violations = checkDocumentChrome(pagina, 'x', ['index.html']);
+    expect(violations).toHaveLength(1);
+    expect(violations[0]?.detail).toContain('not among the published files');
+  });
+
+  it('reads a Windows path as the same file', () => {
+    expect(checkDocumentChrome(pagina, 'x', ['apple-touch-icon.png'])).toEqual([]);
+  });
+
+  it('asks nothing about the file when no list is handed over', () => {
+    expect(checkDocumentChrome(pagina, 'x')).toEqual([]);
+  });
+});
+
+describe('checkThemeColour', () => {
+  const pagina = (colore: string) =>
+    `<html><head><meta name="theme-color" content="${colore}" /></head><body></body></html>`;
+
+  it('says nothing when the meta and the token agree', () => {
+    expect(checkThemeColour(pagina('#003049'), ':root{--blue-700:#003049}')).toEqual([]);
+  });
+
+  it('fires the day the token is retuned and the meta is not', () => {
+    const violations = checkThemeColour(pagina('#003049'), ':root{--blue-700:#04263a}');
+    expect(violations).toHaveLength(1);
+    expect(violations[0]?.detail).toContain('#04263a');
+  });
+
+  it('does not mind how the two are capitalised', () => {
+    expect(checkThemeColour(pagina('#003049'), ':root{--blue-700:#003049}')).toEqual([]);
+  });
+
+  it('says nothing when there is no meta to compare', () => {
+    expect(checkThemeColour('<html><head></head><body></body></html>', ':root{--blue-700:#003049}')).toEqual([]);
+  });
+
+  it('says nothing when the stylesheet does not declare the token', () => {
+    expect(checkThemeColour(pagina('#003049'), ':root{--cream-100:#fcefd4}')).toEqual([]);
   });
 });

@@ -493,7 +493,11 @@ export function checkSkipLinkStyle(css: string, path = 'the published CSS'): Vio
  * The value is read, not just the presence of the tag: `theme-color` with an
  * empty content is a tag that satisfies a search and paints nothing.
  */
-export function checkDocumentChrome(markup: string, path = 'the page'): Violation[] {
+export function checkDocumentChrome(
+  markup: string,
+  path = 'the page',
+  published?: readonly string[],
+): Violation[] {
   const clean = readableMarkup(markup);
   const violations: Violation[] = [];
 
@@ -536,9 +540,64 @@ export function checkDocumentChrome(markup: string, path = 'the page'): Violatio
       rule: 'document',
       detail: `${path}: no \`apple-touch-icon\`, so iOS puts a shrunken screenshot of the page on the Home screen — here a full-screen scene, which is a blue smudge`,
     });
+  } else if (published) {
+    /* Named is not the same as there. An `href` pointing at a file nobody
+       publishes leaves iOS doing exactly what the message above describes,
+       with this guard answering «fine» — which is the shape of guard this
+       repository keeps catching. `checkInternalLinks` asks the same question
+       of every internal address, and this asks it of the one link that is not
+       an address a reader ever follows. */
+    const wanted = href.replace(/^\//, '').split(/[?#]/)[0] ?? '';
+    const found = published.some(
+      (file) => file.split('\\').join('/').replace(/^\//, '') === wanted,
+    );
+    if (!found) {
+      violations.push({
+        rule: 'document',
+        detail: `${path}: the \`apple-touch-icon\` points at \`${href}\`, which is not among the published files — iOS falls back to a screenshot of the page and nothing else notices`,
+      });
+    }
   }
 
   return violations;
+}
+
+/**
+ * The colour of the browser's own bar is the one the page is painted in.
+ *
+ * `theme-color` cannot read a custom property — a `<meta>` has nowhere to read
+ * one from — so the value is written out, and a written-out colour is rule 9's
+ * whole subject: right the day it is typed and wrong the day the token it
+ * copies is retuned. What cannot be removed can at least be held together, the
+ * way the favicon is: the two are compared here, on the published page and the
+ * published stylesheet, so they cannot drift in silence.
+ */
+export function checkThemeColour(
+  markup: string,
+  css: string,
+  path = 'the page',
+): Violation[] {
+  /* `metaTags` is what every other guard in this file reads a `<meta>` with,
+     and reading it another way is how two answers to one question start. */
+  const declared = (metaTags(readableMarkup(markup)).get('theme-color') ?? '')
+    .trim()
+    .toLowerCase();
+  if (!declared) return [];
+
+  /* The page's ground, by the name the tokens give it. Read from the published
+     CSS so that what is compared is what the browser gets. */
+  const token = /--blue-700\s*:\s*([^;}]+)/.exec(css)?.[1]?.trim().toLowerCase();
+  if (!token) return [];
+
+  if (declared !== token) {
+    return [
+      {
+        rule: 'document',
+        detail: `${path}: \`theme-color\` is \`${declared}\` while \`--blue-700\`, the ground this page is painted in, is \`${token}\`. The bar of the browser is the one part of the site painted by a copy of a token, and this is the day the copy stopped agreeing`,
+      },
+    ];
+  }
+  return [];
 }
 
 /**

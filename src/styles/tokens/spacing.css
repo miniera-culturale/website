@@ -99,3 +99,25 @@
     --scene-height: 100svh;
   }
 }
+
+/* A phone on its side, where the two fixed bars are the scarce resource: 66 px
+   at the head and 74 at the foot out of the 268 a landscape viewport actually
+   has is more than half the screen, and what is left cannot hold the date, the
+   venue, the buttons and the note. The touch targets do **not** move — a finger
+   is the same size however the phone is held, rule 23 — so what gives is the
+   padding around them: one step instead of two, on both bars. The components
+   draw themselves from these sums, so declaring them here is the whole change.
+   PR 19 measured it: it is the twenty-eight pixels that make the difference
+   between a note that fits and a note clipped in half. */
+@media (max-width: 900px) and (max-height: 480px) and (orientation: landscape) {
+  :where(:root) {
+    --nav-bar: calc(
+      var(--space-2) + var(--space-1) * 2 + var(--tap-target) +
+        var(--border-width-hairline) * 2
+    );
+    --timeline-bar: calc(
+      var(--timeline-tick-height) + var(--space-1) * 2 + var(--border-width-hairline) * 2 +
+        var(--space-2)
+    );
+  }
+}

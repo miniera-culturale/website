@@ -233,14 +233,15 @@ function rank(index: number): string | undefined {
      Here the box does take pointer events — it has a ground and an edge and
      reads as a bar, so a finger landing on it is on a control and not on the
      evening behind it. */
-  /* `min-height` insieme alla larghezza, ed è ciò che tiene il telefono
-     orizzontale fuori di qui: la barra in basso costa 78 px di altezza, che su
-     uno schermo girato ne lascia centoventi al contenuto, e l'altezza è
-     esattamente la cosa che lì non c'è. Sotto i 481 px valgono le regole di
-     sopra — la rotaia verticale a destra — che è la forma giusta quando lo
-     spazio abbonda in larghezza. Nessuna riga duplicata: cambia la condizione,
-     non le dichiarazioni. */
-  @media (max-width: 900px) and (min-height: 481px) {
+  /* Width alone, as before PR 19 tried it the other way. Sending the phone in
+     landscape back to the desktop rules looked like it bought 78 px of height,
+     and it took two things with it: the rail up there has no `--tap-target` on
+     its ticks — they measured 23 px on a real viewport — and it does not
+     scroll, so with eighty-one evenings the ones past the bottom edge are
+     clipped and unreachable, which is the defect PR 11 exists to have fixed.
+     The bar stays the bar, and the height it costs is bought back below by
+     making it shorter rather than by moving it. */
+  @media (max-width: 900px) {
     .timeline {
       top: auto;
       right: var(--space-3);
@@ -296,6 +297,16 @@ function rank(index: number): string | undefined {
       flex-direction: row;
       justify-content: flex-start;
       width: max-content;
+    }
+
+    /* Sideways the bar is drawn out of the shorter sum declared in the tokens:
+       the padding comes down a step and the step off the bottom edge with it.
+       The tick itself does not change — it is the thing a finger has to hit. */
+    @media (max-height: 480px) and (orientation: landscape) {
+      .timeline {
+        bottom: var(--space-2);
+        padding: var(--space-1);
+      }
     }
 
     /* Every evening keeps its date here: on a phone the bar scrolls, so there

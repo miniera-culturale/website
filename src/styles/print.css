@@ -42,14 +42,24 @@
     scroll-snap-type: none;
   }
 
-  /* One evening per sheet, and only the ones a reader asked for: printing the
-     whole archive is eighty-one sheets nobody wants. What is on screen is the
-     scene the programme opened on. */
+  /* One evening per sheet, and only the one a reader asked for: printing the
+     whole archive is eighty-one sheets nobody wants.
+
+     The evening on screen is `data-current`, which the scroller moves as the
+     reader passes from one to the next — not `data-open`, which the build
+     writes once on the evening the route opens at and nobody moves after. With
+     `data-open` this sheet printed the eighty-first while the reader was on the
+     seventy-eighth, and nothing on the page looked wrong.
+     `data-open` is still the fallback, and it is the right one: with no script
+     running there is no `data-current` anywhere, and the opening evening *is*
+     the one on screen. The `:has()` is what keeps the two from printing two
+     sheets when both are there. */
   [data-scene] {
     display: none;
   }
 
-  [data-scene][data-open] {
+  [data-scene][data-current],
+  [data-scroller]:not(:has([data-current])) [data-scene][data-open] {
     display: block;
     height: auto;
     min-height: 0;

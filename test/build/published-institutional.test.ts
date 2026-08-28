@@ -185,6 +185,13 @@ describe('the placeholders', () => {
          docs/questioni-aperte.md — a real address with lorem ipsum under it is
          the one thing worse than no address. */
       if (!withDomain) return;
+      /* The component gallery is the one page whose placeholders are the
+         point: it publishes `Placeholder` to show what the component looks
+         like, and no real text can ever resolve those two blocks. It is
+         `noindex` and it is not a page a reader is sent to — see docs/piano.md
+         on why it ships at all. Every other page has to be clean, which is
+         what this test is for. */
+      if (/(^|\/)componenti(\/index\.html|\.html)$/.test(page.path)) return;
       expect(checkNoPlaceholders(page.html, page.path)).toEqual([]);
     },
   );
