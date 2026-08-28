@@ -16,6 +16,18 @@
  * Timeline of PR 8 will put on its ticks — the export keeps it on the section
  * too, as `data-screen-label`.
  *
+ * PR 19 added two more, and neither is decoration either. `data-photo` says
+ * whether there is a picture at all, so the stylesheet can stop reserving a
+ * column for one that is not there — `:has()` would answer the same question
+ * and is inside this project's floor, but an attribute is what every other
+ * decision of this scene is hung on, and it is the one a build assertion can
+ * read out of dist/. `data-title` carries the name of the evening ready made:
+ * the scroller writes it into `document.title` as the reader arrives, so the
+ * tab and the bookmark say the evening the address already says. It is composed
+ * by the domain and not by the script — `eveningTitle()` is the same function
+ * the route `/N` titles itself with, and two copies of a name are two names the
+ * day one of them is edited.
+ *
  * The scene is not itself scrollable, which is a departure from the export:
  * a scrollable section inside a scrollable scroller makes it ambiguous which
  * one the arrow keys are talking to, for a keyboard and for a screen reader
@@ -26,7 +38,7 @@ import { Image } from 'astro:assets';
 import Button from './Button.astro';
 import GuestRow from './GuestRow.astro';
 import Label from './Label.astro';
-import { type EventState, stateOf } from '../lib/events.ts';
+import { type EventState, eveningTitle, stateOf } from '../lib/events.ts';
 import type { Scene } from '../lib/programme.ts';
 import { venueLines } from '../lib/venues.ts';
 
@@ -66,8 +78,11 @@ const BOOKING_LABEL = 'Prenota il posto';
   data-state={state}
   data-cycle={scene.cycle.number}
   data-label={scene.shortDate}
+  data-photo={scene.photo ? 'true' : undefined}
+  data-title={eveningTitle(scene)}
   data-open={open ? 'true' : undefined}
   aria-labelledby={titleId}
+  tabindex="-1"
 >
   <div class="scene-text">
     <div class="scene-heading">
@@ -279,12 +294,27 @@ const BOOKING_LABEL = 'Prenota il posto';
     border-bottom: var(--border-width-hairline) solid var(--border-hairline);
   }
 
+  /* Clipped, never scrollable, and **at every width**: the phone had both
+     guards from PR 18 and the desktop had neither, so a window 500 px tall or a
+     title of ninety characters pushed the note and the buttons out under the
+     bottom edge of the scene — 26 px in the first case, 88 in the second, both
+     measured at PR 19. What runs over is cut off here instead of being painted
+     over the evening below, which is the same choice the phone already makes.
+     Nothing is lost to a reader either way: from PR 9 every evening is also a
+     page of its own, with all of it. */
+  /* One column when there is no photograph: the text takes the whole width
+     instead of sitting beside a reserved emptiness. */
+  .scene:not([data-photo]) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .scene-text {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: clamp(8px, 2vh, 20px);
     min-width: 0;
+    overflow: hidden;
   }
 
   .scene-heading {
@@ -528,11 +558,25 @@ const BOOKING_LABEL = 'Prenota il posto';
 
   /* The design turns the picture on its corner and rounds it into a capsule; the
      inner counter-rotation keeps the picture upright inside the tilted frame. */
+  /* A rectangle turned 45° takes (w + h) / √2 across, which with this aspect
+     ratio is about 1.27 times its height: at 88% the frame reached 1211 px on a
+     1280 window and the Timeline's rail begins at 1132, so the dates of the
+     ticks were being drawn over a photograph — where the contrast is the
+     picture's and not the token's, and no measurement of ours holds. Measured at
+     PR 19.
+
+     Two levers, because one was not enough: the height comes down, and the
+     centre moves a step to the left. Height alone could not settle it — the row
+     of the grid is as tall as the text beside it, so the same percentage lands
+     differently on every evening, and the four sample scenes overshot by
+     between 10 and 38 px at the same size. The step left is spent into the
+     column's own gap, where there is room, and the shape and the tilt are the
+     brand's and do not change. */
   .scene-photo-frame {
     position: absolute;
     top: 50%;
-    left: 50%;
-    height: 88%;
+    left: calc(50% - var(--space-6));
+    height: 72%;
     aspect-ratio: 4 / 5;
     transform: translate(-50%, -50%) rotate(45deg) scale(0.96);
     border-radius: var(--radius-pill);
@@ -595,10 +639,6 @@ const BOOKING_LABEL = 'Prenota il posto';
         calc(var(--timeline-bar) + var(--space-2));
     }
 
-    .scene-text {
-      overflow: hidden;
-    }
-
     /* A phone gets a scale of its own, and this is the correction the first
        real device asked for: the same fluid curve that reads well on a desktop
        arrives here as type too big for the room, and what pays for it is the
@@ -644,6 +684,9 @@ const BOOKING_LABEL = 'Prenota il posto';
        down remove it outright, which is the honest version of the same
        decision. */
     .scene-photo-frame {
+      /* Centred again, and taller: down here the rail is a bar across the
+         bottom, so there is nothing to the right to stay clear of. */
+      left: 50%;
       height: 78%;
     }
   }
@@ -774,6 +817,119 @@ const BOOKING_LABEL = 'Prenota il posto';
     }
   }
 
+  /* A phone held sideways, where the composition changes instead of tightening.
+   *
+   * Under 480 px of usable height every threshold tuned at PR 18 piles up at
+   * once: the picture above the text leaves the text a little over a hundred
+   * pixels, and at 800×360 the box was clipping a hundred and seventy-three of
+   * them — with the date, the venue, the buttons and the note inside, which is
+   * everything one opens the page for. Measured at PR 19, and the plan says it:
+   * what this wants is a different composition, not a retuned number.
+   *
+   * The composition is the desktop's, which for a phone on its side is simply
+   * the right shape: the text on the left and the picture beside it, on one
+   * row. The picture stays — that is PR 18's decision — and takes the column it
+   * did not have upright. */
+  @media (max-width: 900px) and (max-height: 480px) and (orientation: landscape) {
+    .scene {
+      /* Wider than the desktop's proportion, and not for taste: one line of
+         title less is worth twenty-two pixels of height here, which is the
+         scarce currency. The picture stays, and stays readable. */
+      grid-template-columns: minmax(0, 1.9fr) minmax(0, 0.6fr);
+      grid-template-rows: minmax(0, 1fr);
+      align-content: safe center;
+      gap: var(--space-4);
+      /* The bar's own height at the foot, as upright, and the gutter at the
+         sides: what changes here is the composition, not where the rail is.
+         Both sums are the shorter ones the tokens declare for a screen this
+         low. */
+      padding: calc(var(--nav-bar) + var(--space-1)) var(--gutter-page)
+        calc(var(--timeline-bar) + var(--space-1));
+    }
+
+    /* Above the text upright, beside it here: `order` goes back to zero, which
+       is the order of the markup. */
+    .scene-photo {
+      order: 0;
+    }
+
+    .scene-photo-frame {
+      left: 50%;
+      height: 88%;
+    }
+
+    /* The title comes down a step: sideways the text column is half the
+       screen, and the 28 px of upright arrive there on three lines. */
+    .scene-title {
+      font-size: clamp(1.0625rem, 2.6vw, 1.1875rem);
+    }
+
+    .scene-text {
+      gap: var(--space-1);
+    }
+
+    .scene-meta {
+      gap: var(--space-1);
+      /* The hairline above the facts goes, and the space it stood off: the last
+         few pixels, and a line is not information. */
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .scene-guests {
+      --guest-size: 0.9375rem;
+      --portrait-size: 2rem;
+
+      gap: var(--space-1);
+    }
+
+    /* Side by side rather than stacked, which is where the last thirty pixels
+       come from: the button and the note are one line each and the note is
+       short. Nothing is made smaller — the button keeps the size a thumb needs
+       — the two just stop queuing. The evening that was already fitting is the
+       cancelled one, which has no button: that is what said the button was the
+       piece that did not fit. */
+    .scene-actions,
+    .scene-meta {
+      flex-flow: row wrap;
+      align-items: center;
+      gap: var(--space-1) var(--space-4);
+    }
+  }
+
+  /* And under 420 px the row of guests gives way too, which is a new decision
+     and not a tuning: until PR 18 the only thing that gave way was the
+     description, because it was the only one repeated in full elsewhere. Here
+     that is not enough — at 800×360 the evening with two guests and the
+     recordings asked for a hundred and seventy pixels more than there are, and
+     what stayed outside were the date, the venue and the buttons: the three
+     things one opens the page for, against names the same evening repeats on
+     its own page and that a phone held sideways can find again by turning it
+     back. Written in decisioni.md, because the order of what gives way is a
+     product decision and not a measurement. */
+  @media (max-width: 900px) and (max-height: 420px) and (orientation: landscape) {
+    .scene-guests {
+      display: none;
+    }
+
+    /* With the guests gone there were still forty-two pixels too many, and
+       they come from here. The heading is the cycle's name, the format and the
+       state: the cycle is already said by the accent of the whole screen, and
+       the format and the state are said by the evening's own page. The venue
+       goes back onto one line, which is the shape it had before PR 18 and which
+       here has no room to be better. What is left is the list the plan
+       declares: title, date, place, buttons, note. */
+    .scene-heading {
+      display: none;
+    }
+
+    .scene-venue {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0 var(--space-2);
+    }
+  }
+
   @media (min-width: 901px) and (max-height: 800px) {
     .scene-description {
       display: -webkit-box;
@@ -786,6 +942,43 @@ const BOOKING_LABEL = 'Prenota il posto';
   @media (min-width: 901px) and (max-height: 640px) {
     .scene-description {
       -webkit-line-clamp: 2;
+    }
+  }
+
+  /* And below 600 it goes, as it does on a phone below 760 and in the same
+     order: the description is the longest thing here and the only one repeated
+     in full on the evening's own page. A laptop with the browser's toolbars out
+     is 500 px of usable height, which is where this was found. */
+  @media (min-width: 901px) and (max-height: 600px) {
+    .scene-description {
+      display: none;
+    }
+
+    /* And the room comes from the spaces, not from the sizes — the same order
+       the phone follows below 760: what a reader is here for is the title, the
+       date, the place and the buttons, and shrinking those to fit is selling
+       the wrong thing. The head of the padding drops to what the pill actually
+       occupies, `--nav-bar`, instead of the 88 px floor tuned for a tall
+       window: with the description gone it is the largest piece of nothing
+       left. Measured at PR 19 on a 1280×500 window, where the note was still
+       being clipped in half after the description had already given way. */
+    .scene {
+      padding-top: calc(var(--nav-bar) + var(--space-2));
+      padding-bottom: var(--space-4);
+    }
+
+    .scene-text {
+      gap: var(--space-2);
+    }
+
+    .scene-meta {
+      gap: var(--space-1);
+      padding-top: var(--space-2);
+    }
+
+    .scene-guests,
+    .scene-actions {
+      gap: var(--space-2);
     }
   }
 </style>

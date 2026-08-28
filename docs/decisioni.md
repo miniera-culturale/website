@@ -60,9 +60,9 @@ forte di dirlo. *(PR 17)*
 non toglie un indirizzo dall'indice: dice al crawler di non *leggere* la pagina,
 e una pagina non letta è una pagina il cui `noindex` non si vede mai — quindi
 l'indirizzo nudo può finire in elenco lo stesso. Il `noindex` ce l'hanno già ed
-è quello che funziona; la sitemap della PR 20 è l'altra metà. Il piano diceva il
+è quello che funziona; la sitemap della PR 21 è l'altra metà. Il piano diceva il
 contrario, e oggi non cambierebbe niente perché `Disallow: /` copre tutto: il
-difetto si pubblicherebbe alla PR 20. *(PR 17)*
+difetto si pubblicherebbe alla PR 21. *(PR 17)*
 
 **La CSP si genera dal pubblicato, non si scrive a mano.** Questo sito non ha
 nemmeno uno script esterno: sono tutti `is:inline`, per quattro decisioni
@@ -514,7 +514,7 @@ per come è formattato un file invece che per quello che dice.
 
 **`og:image`, invece, non lo pretende, e non è una svista.** Ha bisogno di
 un'immagine, non di un dominio, e il repository non ne ha una: chiederlo insieme
-a `og:url` avrebbe aperto la PR 20 su una suite rossa che si poteva chiudere
+a `og:url` avrebbe aperto la PR 21 su una suite rossa che si poteva chiudere
 solo inventando un asset che nessuno ha scelto — cioè un test che detta una
 decisione di contenuto. La decisione sta in
 [questioni-aperte.md](questioni-aperte.md); quello che la suite controlla è che
@@ -958,7 +958,7 @@ ciclo viene ritarato nel CMS, indicando un file di test invece del contenuto che
 `CLAUDE.md` dice che per lo stile guardare il sorgente non basta, quindi una
 rassegna viva solo in `npm run dev` lascerebbe le varianti di ogni componente
 verificate da nessuna parte. Fuori dall'indice perché è una pagina di servizio —
-e la sitemap della PR 20 dovrà escluderla. Non `/rassegna`, che è della rassegna
+e la sitemap della PR 21 dovrà escluderla. Non `/rassegna`, che è della rassegna
 stampa della PR 13.
 
 ## Forme di ritaglio, la geometria
@@ -1428,7 +1428,7 @@ mai messo in cache: è qualcuno che chiede di un altro giorno, e rispondergli
 dalla memoria risponderebbe a un'altra domanda. *(PR 9, in revisione)*
 
 **L'immagine da anteprima si genera solo quando c'è il dominio.** Prima si
-generava comunque, con l'argomento che alla PR 20 non ci fosse niente da
+generava comunque, con l'argomento che alla PR 21 non ci fosse niente da
 ricordarsi — e il costo si vedeva in `dist/`: un JPEG per serata che nessuna
 pagina referenziava, cioè ottantuno ridimensionamenti e ottantuno file morti in
 ogni deployment con l'archivio pieno. La promessa regge lo stesso: arriva il
@@ -1562,7 +1562,7 @@ link, e in un menu è una voce che sembra attiva e non lo è — la stessa mezza
 verità dell'`aria-disabled` su un `<a>` senza indirizzo, tolta alla PR 6. È
 testo, con accanto il suo *in arrivo*. E niente pagina: sarebbe un indirizzo
 condivisibile e indicizzabile per qualcosa che non ha niente da dire, più una
-rotta che la sitemap della PR 20 dovrebbe ricordarsi di escludere. *(PR 13)*
+rotta che la sitemap della PR 21 dovrebbe ricordarsi di escludere. *(PR 13)*
 
 **Ogni link interno pubblicato deve trovare la sua pagina in `dist/`**,
 `checkInternalLinks`: la sorella di `checkEveningRoutes`, e il motivo per cui la
@@ -1612,7 +1612,7 @@ rende la sostituzione un file solo invece di una caccia — il componente
 `data-placeholder` che la guardia legge, e con `site` impostato in
 `astro.config.mjs` un solo blocco marcato in `dist/` è una violazione. È
 l'interruttore di `og:url`, armato dalla configurazione e non dalla memoria di
-qualcuno: **la PR 20 non chiude finché i testi veri non ci sono**, ed è voluto —
+qualcuno: **la PR 21 non chiude finché i testi veri non ci sono**, ed è voluto —
 un dominio vero con un lorem ipsum sopra è l'unica cosa peggiore di non avere il
 dominio. *(PR 13)*
 
@@ -1757,7 +1757,7 @@ perché le due si sommano e la classica continuerebbe a bloccare il CMS:
 
 Due e non uno, perché il bypass si dà a un ruleset e non a una regola: con uno
 solo, il team che salva dal CMS potrebbe anche riscrivere la storia di `main`. Il
-bypass è a un **team** e non a un account perché alla PR 20 il CMS entra in OAuth
+bypass è a un **team** e non a un account perché alla PR 21 il CMS entra in OAuth
 e commetta con l'identità di chi ha fatto l'accesso — chi sta in quel team è una
 voce di [questioni-aperte.md](questioni-aperte.md). I ruleset puntano a
 `~DEFAULT_BRANCH` e non a `refs/heads/main`, così seguono il branch predefinito
@@ -1985,6 +1985,83 @@ resta fermo mentre il testo cresce è quel che al testo dà lo spazio, e
 `--timeline-tick-height` è un bersaglio per un dito, grande uguale su ogni
 schermo a ogni impostazione. Una guardia che le segnalasse sarebbe una guardia
 che scatta sul lavoro giusto, e quelle si spengono. *(PR 18)*
+
+## Il controllo qualità
+
+**Sotto `prefers-reduced-motion` lo snap viene tolto, e non era scritto da
+nessuna parte.** Il collaudo l'ha trovato come un difetto — «non funziona lo
+snap» — e non lo è: nel CSS c'è una riga esplicita,
+`[data-scroller] { scroll-snap-type: none !important }`. La decisione regge, e
+la ragione è che uno snap obbligatorio è movimento che il lettore non ha
+chiesto: sposta la pagina di uno schermo intero per conto suo, ed è esattamente
+ciò che quella preferenza chiede di non fare. Quello che mancava era scriverlo:
+una decisione che nessuno ricorda è una decisione che il prossimo collaudo
+segnala di nuovo.
+
+**La palette chiara vive nel foglio della stampa.** `[data-theme="paper"]` era
+dichiarata in `colors.css` e non la impostava nessuno: una palette scritta e
+mai resa, che il piano della PR 19 chiedeva di decidere. È stata **spostata**,
+non copiata, dentro `@media print` di `src/styles/print.css`, che è la cosa per
+cui era stata scritta — il commento diceva «print, documents, email». Una copia
+lasciata indietro sarebbe stata due sorgenti per una palette, decise dall'ordine
+di due fogli: la regola 12 in un altro costume.
+
+**Il titolo della pagina segue la serata, e il nome si compone in un posto
+solo.** La regola 16 chiedeva che l'indirizzo seguisse la serata a schermo e non
+diceva niente del titolo, che è però la metà che un segnalibro salva davvero: a
+metà archivio il browser offriva «/78» sotto il nome «Il programma». Il nome lo
+compone `eveningTitle()` in `src/lib/events.ts`, la rotta `/N` lo usa per il suo
+`<title>` e la scena lo pubblica in `data-title`; lo script lo legge e non lo
+ricompone. Scriverlo nello script sarebbe stato il template in due posti, e due
+copie di un nome sono due nomi il giorno che se ne modifica una.
+
+**Sul telefono girato di lato cedono anche i relatori, l'etichetta del ciclo e
+la seconda riga della sede.** Fino alla PR 18 l'unica cosa che cedeva era la
+descrizione, perché era l'unica ripetuta per intero altrove. In orizzontale non
+basta: su un viewport di 786×268 — un telefono con le barre di Safari — la
+serata con due relatori e le registrazioni chiedeva centosettanta pixel più di
+quelli che ci sono, e a restare fuori erano la data, la sede e i bottoni. Cioè
+le tre cose per cui uno apre la pagina. L'ordine di ciò che cede è quindi: la
+descrizione, i relatori, l'etichetta del ciclo, la seconda riga della sede — e
+quello che resta è l'elenco che il piano dichiara: titolo, data, luogo, bottoni,
+nota. Il ciclo continua a dirlo l'accento di tutta la schermata.
+
+**In orizzontale la Timeline resta la barra in basso, e sono le barre a
+dimagrire.** Il primo tentativo era stato mandarla a destra come sul desktop:
+sembrava comprare 78 px di altezza, e ne portava via due cose che la revisione
+ha trovato. Lassù le tacche non hanno `--tap-target` — misurate 23 px su un
+viewport vero — e la rotaia non scorre, quindi con ottantuno serate quelle sotto
+il bordo sono ritagliate e irraggiungibili: cioè il difetto che la PR 11 esiste
+per aver risolto, riaperto per far spazio a una nota.
+
+Quello che dimagrisce è il contorno dei bersagli, mai i bersagli: sotto i 480 px
+di altezza `--nav-bar` e `--timeline-bar` si ridichiarano con un gradino di
+padding invece di due, e i due componenti si ridisegnano dalla stessa somma. Il
+dito resta a 44 px comunque si tenga il telefono. Gli ultimi trenta pixel
+arrivano dal bottone e dalla nota messi in riga invece che in colonna, e dalla
+linea sopra i fatti, che è un tratto e non un'informazione: niente si rimpicciolisce,
+smettono solo di stare in fila.
+
+**La rotella sopra una tacca muove il programma di una serata.** Le tacche hanno
+`pointer-events: auto` per restare cliccabili, e una tacca che cattura la
+rotella cerca un antenato che scorra: la rotaia non scorre e il documento è alto
+uno schermo, quindi il programma restava fermo. Non esiste un modo in CSS di
+dire «prendi i click ma non la rotella», quindi l'evento si inoltra a mano. Il
+primo tentativo sommava il delta allo `scrollTop` e non è sopravvissuto allo
+snap — duecento pixel dentro una scena di ottocento vengono riagganciati
+indietro, e la rotaia restava morta sembrando riparata. Quello che funziona è la
+stessa mossa dei tasti freccia: una serata per gesto, con una soglia di tempo
+perché un trackpad manda una raffica di eventi per un solo movimento della mano.
+
+**La fotografia si sposta invece di rimpicciolirsi soltanto.** Un rettangolo
+ruotato di 45° occupa `(w + h) / √2` in orizzontale, e la riga della griglia è
+alta quanto il testo che le sta accanto: la stessa percentuale atterra quindi
+diversamente su ogni serata, e le quattro d'esempio sbordavano di 10, 12, 27 e
+38 px sotto la rotaia. Ridurre l'altezza da sola avrebbe voluto dire portarla
+sotto la metà. Due leve insieme — 72% di altezza e il centro spostato di uno
+spazio verso sinistra, dentro il gap della colonna dove il posto c'è — la
+riportano tutta dentro senza toccare né la forma né l'inclinazione, che sono del
+marchio.
 
 ## Rimandate
 

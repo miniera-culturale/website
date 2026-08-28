@@ -227,6 +227,26 @@ const { scenes, openIndex } = Astro.props;
            reader moves. */
         reveal(index);
 
+        /* The name of the tab, with the address. Rule 16 asks the address to
+           follow the evening on screen and says nothing about the title,
+           which is the half a bookmark actually saves: halfway down the
+           archive the browser was offering «/78» under the name «Il
+           programma». The string is not composed here — the scene carries it
+           in `data-title`, written by the same `eveningTitle()` the route
+           `/78` titles itself with. */
+        var name = scenes[index].getAttribute('data-title');
+        if (name) document.title = name;
+
+        /* And the evening the reader is actually on, said in the markup so
+           that a stylesheet can ask. `data-open` cannot answer it: the build
+           writes it once, on the evening the route opens at, and nothing moves
+           it — so print.css was putting the opening evening on paper while the
+           reader was looking at another one. With no script running there is
+           no `data-current` anywhere and the opening evening is the one on
+           screen, which is what the print sheet falls back to. */
+        for (var s = 0; s < scenes.length; s++) scenes[s].removeAttribute('data-current');
+        scenes[index].setAttribute('data-current', 'true');
+
         var number = scenes[index].getAttribute('data-number');
         if (number && history.replaceState) {
           try {
@@ -326,8 +346,88 @@ const { scenes, openIndex } = Astro.props;
         if (!tick) return;
 
         var index = Number(tick.getAttribute('data-index'));
-        if (index >= 0 && index < scenes.length) aim(index);
+        if (index < 0 || index >= scenes.length) return;
+
+        /* The jump is ours from here on, and that is the whole point: left to
+           the browser, a click on `#serata-78` pushes a history entry — the
+           browser does it, not us — and the observer then rewrites that entry
+           to `/78`. What a reader gets is a back button that changes the
+           address and leaves the page where it is; the second press leaves the
+           site. Rule 16 promises the back button gets you out, and the promise
+           covered the scrolling and not the jumps. Found at PR 18, fixed here.
+
+           The clicks a browser would not follow — middle, Ctrl, Cmd, Shift —
+           have already returned above: that is half the reason a tick is an
+           anchor, and preventing those would be taking it back.
+
+           `scrollIntoView()` with no argument at all, rule 15: the how is left
+           to `scroll-behavior`, which is what makes this instant for everybody
+           and correct for whoever asked for reduced motion. */
+        event.preventDefault();
+        aim(index);
+        scenes[index].scrollIntoView();
+
+        /* And the focus, which the browser would have moved itself: following
+           an anchor sets the point the next Tab starts from, and preventing
+           the default took that away — a keyboard pressing Enter on a tick
+           landed on the evening and went on tabbing through the rail. The
+           scene takes `tabindex="-1"` for this and stays out of the tab order.
+           `preventScroll` because the scrolling is already done, and asking
+           for it twice is how a jump ends up somewhere else. */
+        scenes[index].focus({ preventScroll: true });
       });
+
+      /* The wheel over the rail, which was doing nothing at all.
+         The column is `pointer-events: none` so that scrolling passes through
+         it, and the ticks put it back to `auto` so they stay clickable — and a
+         tick, having caught the wheel, looks for a scrolling ancestor of its
+         own: the rail does not scroll down here, and the document is one screen
+         tall. So the programme stood still wherever the pointer happened to be
+         over a date. Measured on Firefox 153 at PR 19, and true in every engine
+         — it is the trap the rail's own comment describes for the column,
+         never closed for the ticks themselves.
+
+         There is no CSS for «take clicks but not the wheel», so the event is
+         handed on by hand. Not passive, because preventing the default is the
+         point: without it the page underneath scrolls twice. */
+      var lastWheel = 0;
+
+      timeline.addEventListener(
+        'wheel',
+        function (event) {
+          if (event.ctrlKey) return; // pinch zoom, which belongs to the browser
+          if (timeline.scrollWidth > timeline.clientWidth) return; // the phone's bar scrolls itself
+
+          event.preventDefault();
+
+          /* One evening per gesture, the same move the arrow keys make — and
+             not `scrollTop += deltaY`, which was the first attempt and does
+             not survive the snap: with `scroll-snap-type: y mandatory` a
+             scroll of two hundred pixels inside a scene eight hundred tall is
+             pulled straight back to where it started, so the rail stayed dead
+             while looking fixed.
+
+             A trackpad sends a burst of these, so a gesture is one jump: the
+             gate is time and not distance, because the number of events in a
+             flick is a property of the device and its duration is not. */
+          /* The gate closes on the whole burst and not on its first event: a
+             trackpad sends one every sixteen milliseconds for as long as the
+             hand moves, so comparing against the last *jump* let one through
+             every 220 ms — nine evenings in two seconds, while the comment
+             promised one per gesture. Compared against the last *event*, a
+             gesture is one jump however long it lasts, and the next one needs
+             a pause to start. */
+          var inTheSameGesture = event.timeStamp - lastWheel < 220;
+          lastWheel = event.timeStamp;
+          if (inTheSameGesture) return;
+
+          var next = current + (event.deltaY > 0 ? 1 : -1);
+          if (next < 0 || next >= scenes.length) return;
+          aim(next);
+          scenes[next].scrollIntoView();
+        },
+        { passive: false },
+      );
 
       /* The keys, explicitly, on the box that scrolls.
          A scrolling container answers the arrows by itself in Chrome and

@@ -331,6 +331,16 @@ const currentLabel =
       padding: 0 var(--space-3);
     }
 
+    /* Sideways the pill stands one step off the top edge instead of two, which
+       is the sum `--nav-bar` declares for this screen: a scene reserves that
+       much and no more, so the two have to agree or the kicker ends up under
+       the pill. The control inside keeps its 44 px. */
+    @media (max-height: 480px) and (orientation: landscape) {
+      .site-nav-wrap {
+        top: var(--space-2);
+      }
+    }
+
     .site-nav {
       width: 100%;
       justify-content: space-between;

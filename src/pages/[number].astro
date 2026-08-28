@@ -26,6 +26,7 @@
 import { getImage } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Programme from '../components/Programme.astro';
+import { eveningTitle } from '../lib/events.ts';
 import { loadProgramme } from '../lib/programme.ts';
 
 export async function getStaticPaths() {
@@ -59,7 +60,7 @@ const scene = scenes[index]!;
    and produces a preview with no picture. Cut for a while the other way, and
    the cost showed up in dist/: one JPEG per evening that no page referred to,
    which at eighty-one evenings is eighty-one resizes and eighty-one dead files
-   in every deployment. This still leaves nothing to remember at PR 20 — the
+   in every deployment. This still leaves nothing to remember at PR 21 — the
    domain arrives and the pictures arrive with it. */
 const preview =
   Astro.site && scene.photo
@@ -69,7 +70,7 @@ const preview =
 
 /* «Serata 81 — Chi tiene aperto il quartiere»: the number first, because that
    is what the association calls its evenings and what the address says. */
-const title = `Serata ${scene.number} — ${scene.title}`;
+const title = eveningTitle(scene);
 ---
 
 <Base title={title} description={scene.description} image={preview} cycle={scene.cycle.number}>

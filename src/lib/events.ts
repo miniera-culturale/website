@@ -325,3 +325,18 @@ export function noteOf(
   if (event.cancelled) return NOTE_CANCELLED;
   return past ? NOTE_PAST : NOTE_UPCOMING;
 }
+
+/* The name of an evening wherever an evening is named: the `<title>` of its
+ * route, the `<h1>` inside it, and — from PR 19 — the title the scroller writes
+ * as the reader passes from one evening to the next.
+ *
+ * Here rather than in the page that first needed it, because the address
+ * already follows the evening on screen (rule 16) and the title did not: what a
+ * reader bookmarks halfway down the archive is `/78` under the name «Il
+ * programma», which is the wrong evening's name for ever. Fixing that in the
+ * script meant writing this template a second time, and two copies of a name
+ * are two names the day one of them is edited.
+ */
+export function eveningTitle(evening: { number: number; title: string }): string {
+  return `Serata ${evening.number} — ${evening.title}`;
+}

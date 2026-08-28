@@ -12,7 +12,10 @@ import { checkTimelineLinks, checkTimelineTargets, tickTags } from '../guards/ti
 import {
   checkAnchorsWithoutHref,
   checkDocumentBasics,
+  checkDocumentChrome,
   checkOpenGraph,
+  checkSceneTitles,
+  checkThemeColour,
   checkSkipLink,
   checkSkipLinkStyle,
 } from '../guards/document.ts';
@@ -34,6 +37,11 @@ import {
 import astroConfig from '../../astro.config.mjs';
 
 const pages = publishedPages();
+/* Every file that was published, so a link can be checked for landing on one,
+   and the stylesheet, so a colour written in the markup can be checked against
+   the token it copies. */
+const published = listPublishedFiles().map((path) => path.replace(/^dist[\\/]/, ''));
+const css = readPublishedCss();
 
 /* Every address dist/ actually answers: a page, or a file copied beside it.
    Built from what the build produced and not from a list written here — a
@@ -75,6 +83,23 @@ describe('every published page', () => {
     '%s carries the tags a link preview needs',
     (_path, page) => {
       expect(checkOpenGraph(page.html, page.path, { withDomain })).toEqual([]);
+    },
+  );
+
+  it.each(pages.map((page) => [page.path, page] as const))(
+    '%s carries the three things only an eye catches: theme-color, color-scheme, apple-touch-icon',
+    (_path, page) => {
+      // The published file list is passed in so that the touch icon is checked
+      // for being *there* and not only for being named: an href at a file
+      // nobody publishes leaves iOS doing exactly what this guard is about.
+      expect(checkDocumentChrome(page.html, page.path, published)).toEqual([]);
+    },
+  );
+
+  it.each(pages.map((page) => [page.path, page] as const))(
+    '%s paints the browser bar the colour the page is actually painted in',
+    (_path, page) => {
+      expect(checkThemeColour(page.html, css, page.path)).toEqual([]);
     },
   );
 
@@ -280,7 +305,7 @@ describe('every published page', () => {
       // a guard pointed at the wrong stem would satisfy them in exactly the
       // same way. This is what tells the two apart.
       //
-      // It retires itself: PR 20 replaces the photographs and empties the list,
+      // It retires itself: PR 21 replaces the photographs and empties the list,
       // and with an empty list there is nothing to be non-vacuous about.
       const found = pages.flatMap((page) =>
         checkPlaceholderPhotos(page.html, PLACEHOLDER_PHOTOS, { withDomain: true }, page.path),
@@ -288,4 +313,15 @@ describe('every published page', () => {
       expect(found.length).toBeGreaterThan(0);
     },
   );
+});
+
+/* Read across the pages rather than page by page: the question is whether the
+   name a scene carries is the same one that evening's own route publishes, and
+   that needs both of them in hand. */
+describe('the name of an evening', () => {
+  it('is the same in the scene and in the title of its route', () => {
+    expect(checkSceneTitles(pages.map((page) => ({ path: page.path, markup: page.html })))).toEqual(
+      [],
+    );
+  });
 });

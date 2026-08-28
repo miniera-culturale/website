@@ -1,0 +1,113 @@
+/* La stampa.
+ *
+ * `Ctrl+P` on a scroller of full-screen scenes with mandatory snap gave eighty-
+ * one pages of nobody knew what: found at PR 19, and the audience of this
+ * association is fifty and sixty years old — the programme of the season is
+ * something they print. What a sheet has to carry is the evening on screen and
+ * the two institutional pages, readable.
+ *
+ * **This is also where the paper palette lives now.** `[data-theme="paper"]`
+ * was declared in colors.css and set by nobody: a palette written and never
+ * rendered, which PR 19 had to decide about. It was written for exactly this —
+ * «Light surface: print, documents, email» — so it moved here rather than
+ * being deleted, and it is declared once. A copy left behind in colors.css
+ * would be two sources for one palette, decided by the order of two
+ * stylesheets, which is rule 12 in another costume.
+ */
+
+@media print {
+  :root {
+    color-scheme: light;
+
+    --surface-page: var(--cream-100);
+    --surface-raised: var(--white);
+    --surface-sunken: var(--cream-200);
+    --surface-invert: var(--blue-700);
+    --text-primary: var(--blue-700);
+    --text-secondary: rgba(var(--blue-700-rgb), 0.7);
+    --text-muted: rgba(var(--blue-700-rgb), 0.45);
+    --text-on-invert: var(--cream-100);
+    --text-accent: var(--orange-600);
+    --border-hairline: rgba(var(--blue-700-rgb), 0.18);
+    --border-strong: var(--blue-700);
+  }
+
+  /* The scroller is the page on screen and a trap on paper: a box one viewport
+     tall, with the other eighty evenings scrolled out of reach. On paper it
+     stops being a box — the height goes, the snap goes, and what prints is the
+     evening the reader was on. */
+  .scroller {
+    height: auto;
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  /* One evening per sheet, and only the one a reader asked for: printing the
+     whole archive is eighty-one sheets nobody wants.
+
+     The evening on screen is `data-current`, which the scroller moves as the
+     reader passes from one to the next — not `data-open`, which the build
+     writes once on the evening the route opens at and nobody moves after. With
+     `data-open` this sheet printed the eighty-first while the reader was on the
+     seventy-eighth, and nothing on the page looked wrong.
+     `data-open` is still the fallback, and it is the right one: with no script
+     running there is no `data-current` anywhere, and the opening evening *is*
+     the one on screen. The `:has()` is what keeps the two from printing two
+     sheets when both are there. */
+  [data-scene] {
+    display: none;
+  }
+
+  [data-scene][data-current],
+  [data-scroller]:not(:has([data-current])) [data-scene][data-open] {
+    display: block;
+    height: auto;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    break-inside: avoid;
+    content-visibility: visible;
+  }
+
+  /* The two rails and the pill are controls: on paper they lead nowhere. */
+  [data-timeline],
+  .site-nav-wrap,
+  .skip-link,
+  dialog.modal {
+    display: none;
+  }
+
+  /* A photograph costs ink and says less than the text beside it; the tilted
+     capsule is also the one thing here that cannot be laid out on a sheet
+     without a height to be a percentage of. */
+  .scene-photo {
+    display: none;
+  }
+
+  .scene-text {
+    overflow: visible;
+  }
+
+  /* Everything that gives way on a short screen comes back on paper, where
+     there is no short screen. */
+  .scene-description {
+    display: block;
+    -webkit-line-clamp: none;
+  }
+
+  /* A link on paper is its text: the address is worth printing only where a
+     reader would have to type it, and those are written out in the page
+     already. */
+  a {
+    text-decoration: none;
+  }
+
+  .page {
+    max-width: none;
+    padding: 0;
+  }
+
+  .page-section {
+    break-inside: avoid;
+  }
+}

@@ -215,7 +215,7 @@ export const ADMIN_PATHS: readonly string[] = ['/admin', '/admin/*'];
  * can answer, and the answer arrives in production.
  *
  * No `Strict-Transport-Security`. It is a promise with a long expiry, made on
- * an address this project abandons at PR 20; it arrives with the domain, in the
+ * an address this project abandons at PR 21; it arrives with the domain, in the
  * step that has one to make it about.
  */
 export function headersFile(scripts: readonly string[]): string {

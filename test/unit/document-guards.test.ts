@@ -14,6 +14,9 @@ import {
   checkSkipLink,
   checkSkipLinkStyle,
   elementsWith,
+  checkDocumentChrome,
+  checkSceneTitles,
+  checkThemeColour,
 } from '../guards/document.ts';
 
 const HEAD =
@@ -127,11 +130,11 @@ describe('checkOpenGraph', () => {
 
     const missing = checkOpenGraph(page(), 'dist/index.html', { withDomain: true });
     expect(missing).toHaveLength(1);
-    expect(missing[0]!.detail).toContain('PR 20');
+    expect(missing[0]!.detail).toContain('PR 21');
   });
 
   it('does not ask for an og:image the repository has no picture for', () => {
-    // Requiring it with the domain would open PR 20 on a red suite fixable only
+    // Requiring it with the domain would open PR 21 on a red suite fixable only
     // by inventing a social image nobody has chosen — the decision is in
     // questioni-aperte.md, not in a failing test.
     const violations = checkOpenGraph(page(), 'dist/index.html', { withDomain: true });
@@ -371,5 +374,137 @@ describe('elementsWith', () => {
     expect(elementsWith('<div data-x>a</div>', 'data-x')).toHaveLength(1);
     expect(elementsWith('<div data-x="true">a</div>', 'data-x')).toHaveLength(1);
     expect(elementsWith('<div data-xyz>a</div>', 'data-x')).toEqual([]);
+  });
+});
+
+describe('checkDocumentChrome', () => {
+  const completa = `<!doctype html><html lang="it"><head>
+    <meta name="theme-color" content="#003049" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  </head><body></body></html>`;
+
+  it('says nothing about a page that carries all three', () => {
+    expect(checkDocumentChrome(completa)).toEqual([]);
+  });
+
+  it('fires on the page as it was before PR 19, with none of them', () => {
+    const violations = checkDocumentChrome('<html><head><title>x</title></head><body></body></html>');
+    expect(violations).toHaveLength(3);
+  });
+
+  it('fires on a theme-color declared with nothing in it', () => {
+    const markup = completa.replace('content="#003049"', 'content=""');
+    expect(checkDocumentChrome(markup)).toHaveLength(1);
+    expect(checkDocumentChrome(markup)[0]?.detail).toContain('theme-color');
+  });
+
+  it('fires on a color-scheme that names only light', () => {
+    const markup = completa.replace('content="dark"', 'content="light"');
+    expect(checkDocumentChrome(markup)[0]?.detail).toContain('color-scheme');
+  });
+
+  it('is not satisfied by an ordinary icon standing in for the touch icon', () => {
+    const markup = completa.replace('rel="apple-touch-icon"', 'rel="icon"');
+    expect(checkDocumentChrome(markup)[0]?.detail).toContain('apple-touch-icon');
+  });
+
+  it('reads the tags whatever order their attributes are in', () => {
+    const markup = `<html><head>
+      <meta content="#003049" name="theme-color" />
+      <meta content="dark" name="color-scheme" />
+      <link href="/apple-touch-icon.png" rel="apple-touch-icon" />
+    </head><body></body></html>`;
+    expect(checkDocumentChrome(markup)).toEqual([]);
+  });
+
+  it('does not count a tag that only sits inside a comment', () => {
+    const markup = `<html><head><!--
+      <meta name="theme-color" content="#003049" />
+      <meta name="color-scheme" content="dark" />
+      <link rel="apple-touch-icon" href="/x.png" />
+    --></head><body></body></html>`;
+    expect(checkDocumentChrome(markup)).toHaveLength(3);
+  });
+});
+
+describe('checkSceneTitles', () => {
+  const scena = (n: string, nome: string) =>
+    `<section data-scene data-number="${n}" data-title="${nome}"></section>`;
+
+  it('says nothing when the scene and the route agree', () => {
+    const pages = [
+      { path: 'index.html', markup: `<html><body>${scena('81', 'Serata 81 — Chi tiene aperto il quartiere')}</body></html>` },
+      { path: '81/index.html', markup: '<html><head><title>Serata 81 — Chi tiene aperto il quartiere</title></head><body></body></html>' },
+    ];
+    expect(checkSceneTitles(pages)).toEqual([]);
+  });
+
+  it('fires when a scene carries no name at all — the state before PR 19', () => {
+    const pages = [
+      { path: 'index.html', markup: '<html><body><section data-scene data-number="81"></section></body></html>' },
+    ];
+    expect(checkSceneTitles(pages)[0]?.detail).toContain('no `data-title`');
+  });
+
+  it('fires when the two names have drifted apart', () => {
+    const pages = [
+      { path: 'index.html', markup: `<html><body>${scena('81', 'Serata 81 — un altro nome')}</body></html>` },
+      { path: '81/index.html', markup: '<html><head><title>Serata 81 — Chi tiene aperto il quartiere</title></head><body></body></html>' },
+    ];
+    expect(checkSceneTitles(pages)[0]?.detail).toContain('two names');
+  });
+});
+
+describe('checkDocumentChrome, on the files that were published', () => {
+  const pagina = `<html><head>
+    <meta name="theme-color" content="#003049" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  </head><body></body></html>`;
+
+  it('says nothing when the icon it names was published', () => {
+    expect(checkDocumentChrome(pagina, 'x', ['apple-touch-icon.png', 'index.html'])).toEqual([]);
+  });
+
+  it('fires when the icon is named and nobody published it', () => {
+    const violations = checkDocumentChrome(pagina, 'x', ['index.html']);
+    expect(violations).toHaveLength(1);
+    expect(violations[0]?.detail).toContain('not among the published files');
+  });
+
+  it('reads a Windows path as the same file', () => {
+    expect(checkDocumentChrome(pagina, 'x', ['apple-touch-icon.png'])).toEqual([]);
+  });
+
+  it('asks nothing about the file when no list is handed over', () => {
+    expect(checkDocumentChrome(pagina, 'x')).toEqual([]);
+  });
+});
+
+describe('checkThemeColour', () => {
+  const pagina = (colore: string) =>
+    `<html><head><meta name="theme-color" content="${colore}" /></head><body></body></html>`;
+
+  it('says nothing when the meta and the token agree', () => {
+    expect(checkThemeColour(pagina('#003049'), ':root{--blue-700:#003049}')).toEqual([]);
+  });
+
+  it('fires the day the token is retuned and the meta is not', () => {
+    const violations = checkThemeColour(pagina('#003049'), ':root{--blue-700:#04263a}');
+    expect(violations).toHaveLength(1);
+    expect(violations[0]?.detail).toContain('#04263a');
+  });
+
+  it('does not mind how the two are capitalised', () => {
+    expect(checkThemeColour(pagina('#003049'), ':root{--blue-700:#003049}')).toEqual([]);
+  });
+
+  it('says nothing when there is no meta to compare', () => {
+    expect(checkThemeColour('<html><head></head><body></body></html>', ':root{--blue-700:#003049}')).toEqual([]);
+  });
+
+  it('says nothing when the stylesheet does not declare the token', () => {
+    expect(checkThemeColour(pagina('#003049'), ':root{--cream-100:#fcefd4}')).toEqual([]);
   });
 });

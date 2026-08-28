@@ -22,7 +22,7 @@
  *    a placeholder that loses its mark is a placeholder that starts passing for
  *    content;
  * 3. with `site` set in astro.config.mjs — that is, the day the site has an
- *    address of its own — a `data-placeholder` in dist/ is a violation. PR 20
+ *    address of its own — a `data-placeholder` in dist/ is a violation. PR 21
  *    cannot publish this. That is the point of it, and it is written down in
  *    docs/questioni-aperte.md so that it is not a surprise then.
  *
@@ -92,6 +92,14 @@ export const PLACEHOLDER_PHOTOS = [
   'ritratto-chiara-fenoglio.png',
   'ritratto-marco-zatterin.png',
   'ritratto-piergiorgio-rosso.png',
+  /* Caricata dal CMS durante il collaudo della PR 19, dalla serata 85, e con il
+     nome che il CMS le dà: un istante in millisecondi. Segnaposto come le
+     altre, e per la stessa ragione — non è di questa associazione — ma nata in
+     un altro modo, ed è la ragione per cui questa riga esiste: la prova che il
+     giro del redattore ha funzionato per davvero è una fotografia che sta in
+     questa cartella senza che nessuno di noi ce l'abbia messa. Esce quando
+     escono le due serate di prova. */
+  '1784367401311.webp',
 ] as const;
 
 export type PlaceholderPerson = { name: string; role: string };

@@ -84,8 +84,15 @@
   gap: var(--space-4);
 }
 
+/* `--text-secondary` and not `--text-muted`, and the reason is a number: muted
+   is 0.44 of the cream over the blue and measures 3.50:1, under the 4.5 a piece
+   of text needs. Measured on the published page at PR 19, not computed from the
+   token — three of these were carrying a label a reader is meant to read. It is
+   the same correction PR 18 made inside a scene, arriving here.
+   `--text-muted` is not dead: it stays for what is genuinely not text a reader
+   has to read — the arrow of a row, the disabled voice of the navigation. */
 .page-label {
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font: var(--type-label);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
@@ -101,7 +108,7 @@
   padding: var(--space-5);
   border: var(--border-width-hairline) dashed rgba(var(--cream-100-rgb), 0.3);
   border-radius: var(--radius-sm);
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font: var(--type-small);
   text-align: center;
 }
@@ -116,7 +123,7 @@
   min-height: 16rem;
   align-content: center;
   justify-items: center;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font: var(--type-small);
   text-align: center;
 }
@@ -169,7 +176,7 @@
 .page-stat-label {
   display: block;
   margin-top: var(--space-2);
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font: var(--type-label);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;

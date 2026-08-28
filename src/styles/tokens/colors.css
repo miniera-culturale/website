@@ -145,17 +145,8 @@
   --accent-rgb: var(--cycle-1-rgb);
 }
 
-/* Light surface: print, documents, email. Same brand, cream ground. */
-[data-theme="paper"] {
-  --surface-page: var(--cream-100);
-  --surface-raised: var(--white);
-  --surface-sunken: var(--cream-200);
-  --surface-invert: var(--blue-700);
-  --text-primary: var(--blue-700);
-  --text-secondary: rgba(var(--blue-700-rgb), 0.7);
-  --text-muted: rgba(var(--blue-700-rgb), 0.45);
-  --text-on-invert: var(--cream-100);
-  --text-accent: var(--orange-600);
-  --border-hairline: rgba(var(--blue-700-rgb), 0.18);
-  --border-strong: var(--blue-700);
-}
+/* The paper palette used to be declared here, as `[data-theme="paper"]`, and
+   nothing ever set that attribute: a palette written and never rendered. PR 19
+   had to decide between connecting it to something and deleting it, and it went
+   to the thing it was written for — src/styles/print.css declares it inside
+   `@media print`. Moved, not copied: one palette, one place. */

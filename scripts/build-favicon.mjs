@@ -22,6 +22,30 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const faviconSource = join(root, 'public', 'favicon.svg');
 export const faviconTarget = join(root, 'public', 'favicon.ico');
 
+/* The icon iOS puts on the Home screen. Without one it takes a screenshot of
+   the page and shrinks it, which on a site that opens on a full-screen scene is
+   a blue smudge — found at PR 19, on a phone. 180×180 is what current iPhones
+   ask for, and one size is enough: iOS downscales, and the drawing is three
+   rectangles. PNG and not SVG, which iOS still does not take here.
+
+   `cover` and not `contain`, which is what it was: iOS composites a
+   transparent icon onto black, and `contain` pads a drawing that is not square
+   with transparency — so the day the tile stops being square the Home screen
+   gets two black bands. `cover` crops instead, which on a square drawing is
+   the same picture and on any other is still an icon. The alternative was to
+   flatten onto a colour, and that would have been the ground written out a
+   second time. */
+export const appleIconTarget = join(root, 'public', 'apple-touch-icon.png');
+export const APPLE_ICON_SIZE = 180;
+
+/** The apple-touch-icon the given drawing produces, as bytes. Writes nothing. */
+export async function buildAppleTouchIcon(source = faviconSource) {
+  return sharp(source, { density: 384 })
+    .resize(APPLE_ICON_SIZE, APPLE_ICON_SIZE, { fit: 'cover' })
+    .png({ compressionLevel: 9 })
+    .toBuffer();
+}
+
 /* 32 for the tab and the bookmark bar, 16 for the browsers that still pick the
    smallest one. Beyond those two the .svg has long since taken over. */
 const SIZES = [32, 16];
@@ -75,4 +99,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   console.log(
     `favicon.ico written with ${sizes.map((size) => `${size}×${size}`).join(' and ')}`,
   );
+
+  writeFileSync(appleIconTarget, await buildAppleTouchIcon());
+  console.log(`apple-touch-icon.png written at ${APPLE_ICON_SIZE}×${APPLE_ICON_SIZE}`);
 }

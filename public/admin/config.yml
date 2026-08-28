@@ -156,10 +156,21 @@ collections:
         # are. checkCmsDateTimezone reads these three lines back.
         input_timezone: Europe/Rome
         output_utc: false
+        # PR 19, e viene da due build rosse su due tentativi: il numero è
+        # l'ordine del sito, quindi una serata con un numero più alto deve
+        # svolgersi dopo quella che la precede. Il controllo esiste — la build
+        # si ferma e dice quali due serate si contraddicono — ma sta alla fine
+        # del viaggio, dopo il commit, e chi compila non lo sa. Sveltia non ha
+        # una convalida che guardi un altro contenuto, quindi qui si può solo
+        # dirlo: è mezza soluzione, e la metà che manca è scritta in
+        # questioni-aperte.md.
         format: YYYY-MM-DDTHH:mm:ssZ
         hint: >-
           Ora italiana, sempre: l'orario di inizio come sta sulla locandina. La
           serata resta «in programma» fino alla mezzanotte del giorno dopo.
+          Dev'essere più avanti della data della serata precedente: il numero è
+          l'ordine del sito, e se i due ordini divergono la pubblicazione si
+          ferma.
       - name: cycle
         label: Ciclo
         widget: relation
@@ -209,6 +220,15 @@ collections:
         label: Foto della serata
         widget: image
         required: false
+        # Ripetuti sul campo, e non solo sulla collection: una fotografia
+        # scelta dalla libreria invece che caricata sul momento veniva scritta
+        # come `/src/assets/photos/…`, cioè con il percorso della libreria
+        # globale — trovato alla PR 19, sulla serata 85, creata da un telefono.
+        # Astro lo risolve lo stesso, quindi non fallisce niente: quello che
+        # cambia è che le due mani che scrivono in src/content/ scrivono in due
+        # forme diverse, ed è la deriva che la regola 21 tiene d'occhio.
+        media_folder: ../../assets/photos
+        public_folder: ../../assets/photos
         hint: >-
           La locandina se la serata è futura, uno scatto in sala se è passata.
           Viene ridimensionata qui, prima del salvataggio.

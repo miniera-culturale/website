@@ -42,7 +42,53 @@ reversibile e prima o poi qualcuno vorrà stampare la foto di una serata.
 
 Non è ancora stato deciso dove.
 
-## Blocca la PR 20
+## Aperte dal controllo qualità
+
+### Centotrentasei caselle che vogliono un dispositivo che non c'è
+
+**Aperta il 17 agosto 2026, alla PR 19.** La matrice del collaudo è stata
+percorsa per 202 caselle su 338. Le altre non sono state saltate per fretta:
+vogliono un iPhone (89 righe, di cui 30 su Safari fra 15.4 e 16.3, che è la
+soglia dichiarata del progetto e non l'ha mai aperta nessuno), un Mac per Safari
+(28), due screen reader veri — VoiceOver e NVDA (13) — e una connessione lenta
+vera (3). L'elenco per dispositivo, con scritto in testa a ciascuno che cosa
+quel dispositivo serve a trovare, è in
+[controllo-qualita-da-fare.md](controllo-qualita-da-fare.md).
+
+Non si risolve con più lavoro: si risolve con i dispositivi. Le due strade sono
+prestarli per mezza giornata, o affittare un servizio di device farm — e la
+seconda non risponde comunque alla domanda degli screen reader, che vanno
+sentiti.
+
+Quattro di quelle righe non le può percorrere **nessuna** automazione, su
+nessuna macchina: `document.hasFocus()` è falso quando la finestra non è in
+primo piano, quindi `:focus` e `:focus-visible` non fanno match e nessuno stile
+di messa a fuoco si applica. Provato in headless e con la finestra aperta, su
+Firefox 153.
+
+### La convalida che il CMS non sa fare
+
+**Aperta il 17 agosto 2026, alla PR 19.** Il numero di una serata è l'ordine del
+sito, quindi la sua data deve venire dopo quella della serata precedente: se i
+due ordini divergono la build si ferma. Il controllo c'è ed è giusto che ci sia
+— è la regola 10 — ma sta alla fine del viaggio, dopo il commit, e chi compila
+il form non lo sa. È stato riprodotto **due volte su due tentativi**, il secondo
+da un'altra persona e da un telefono.
+
+Quello che si è potuto fare è dirlo nel campo, come suggerimento. Quello che
+manca è una convalida che guardi un altro contenuto, e Sveltia non la offre: le
+sue regole sono per campo. Le strade sono tre, e nessuna è gratis:
+
+- un controllo lato CMS scritto come widget personalizzato, che vuole
+  JavaScript nel bundle del CMS e quindi la manutenzione di quel codice;
+- lasciare che la build fallisca e **far arrivare l'errore al redattore** invece
+  che a chi guarda i log — una notifica, o una pagina di stato;
+- accettarlo, e contare sul fatto che le serate si inseriscono in ordine.
+
+Va deciso con il committente, perché la terza è ragionevole solo se chi scrive è
+sempre la stessa persona.
+
+## Blocca la PR 21
 
 ### I testi, i numeri e le persone delle pagine istituzionali
 
@@ -65,7 +111,7 @@ Serve dal committente, in una volta sola:
 
 **E blocca la pubblicazione, per costruzione.** Con `site` impostato in
 `astro.config.mjs` un solo blocco `data-placeholder` in `dist/` è una
-violazione: la PR 20 non può chiudere finché questa voce è aperta. È voluto e
+violazione: la PR 21 non può chiudere finché questa voce è aperta. È voluto e
 sta scritto qui perché allora non sia una sorpresa — un dominio vero con un
 lorem ipsum sopra è l'unica cosa peggiore di non avere il dominio. Se il
 committente decidesse di pubblicare comunque, la strada è togliere le sezioni
@@ -115,7 +161,7 @@ scritta:
 Resta fuori il sito **in orizzontale**, che nessuno aveva mai guardato e che non
 è una taratura: sta nella PR 19.
 
-## Da fare alla PR 20
+## Da fare alla PR 21
 
 ### L'accesso al CMS col bottone, invece che col token
 
@@ -132,7 +178,7 @@ segreto del client, perché una pagina statica non può tenerlo. L'origine è il
 sito pubblicato. Il relay è un Worker, `sveltia-cms-auth`, che Sveltia pubblica
 apposta e che sta su Cloudflare come il resto.
 
-Serve dal committente, alla PR 20 e in una volta sola: l'applicazione OAuth
+Serve dal committente, alla PR 21 e in una volta sola: l'applicazione OAuth
 sull'account GitHub dell'associazione, e il Worker sul suo account Cloudflare.
 Quello che cambia qui dentro è una riga di `public/admin/config.yml` —
 `auth_methods: [oauth, token]` con il `base_url` accanto.
@@ -140,7 +186,7 @@ Quello che cambia qui dentro è una riga di `public/admin/config.yml` —
 ### Chi sta nel team `redazione`
 
 **Aperta il 15 agosto 2026, alla PR 17.** Il bypass che fa salvare il CMS sta sul
-team `redazione` e non su un account, apposta: alla PR 20 il CMS entra in OAuth e
+team `redazione` e non su un account, apposta: alla PR 21 il CMS entra in OAuth e
 commetta con l'identità di chi ha fatto l'accesso, quindi un account «di
 redazione» sarebbe una credenziale condivisa da distribuire adesso e da ritirare
 allora.
@@ -165,7 +211,7 @@ solo quando quella riga compare.
 Da provare, allora: che l'anteprima esca con titolo, descrizione e figura, e che
 la figura sia quella della serata e non la stessa per tutte.
 
-## Da decidere prima della PR 20
+## Da decidere prima della PR 21
 
 ### Se il sito misura le visite, e cosa dice a chi lo chiede
 
@@ -181,7 +227,7 @@ Qualunque cosa lo faccia — Google Analytics per primo — porta con sé un ban
 un'informativa e un trasferimento di dati fuori dall'Unione, cioè tre cose che un
 sito statico di quartiere non ha nessun motivo di portarsi.
 
-Da decidere prima della PR 20, perché la seconda strada cambia la pagina e non la
+Da decidere prima della PR 21, perché la seconda strada cambia la pagina e non la
 configurazione. E qualunque sia la risposta, va scritta: *«non misuriamo niente»*
 è una decisione, `decisioni.md` è il posto, e il giorno che qualcuno propone uno
 script è quello che gli si mette davanti.
@@ -193,7 +239,7 @@ metà. Il repository era `Sogoss/miniera-website` e adesso è
 `miniera-culturale/website`, di un'organizzazione: la risposta è
 «all'associazione», ed è scritta in [decisioni.md](decisioni.md).
 
-**La voce diceva «il trasferimento va fatto prima della PR 20», e sbagliava per
+**La voce diceva «il trasferimento va fatto prima della PR 21», e sbagliava per
 difetto di tre passi.** È la PR 17 a legare il progetto all'account: installa la
 GitHub App di Cloudflare, crea il progetto Pages e mette il secret del deploy
 hook. Farlo dopo significava rifare quei tre, non solo l'OAuth. Il trasferimento
@@ -203,7 +249,7 @@ invece di una giornata.
 **Resta aperta l'altra metà: il progetto Cloudflare.** Va creato sull'account di
 chi possiede il sito, non su quello di chi lo costruisce, e la domanda è la
 stessa — con la differenza che qui non c'è nessun trasferimento gratuito da
-fare dopo: un progetto Pages si ricollega, ma il dominio e il Worker della PR 20
+fare dopo: un progetto Pages si ricollega, ma il dominio e il Worker della PR 21
 gli stanno attaccati.
 
 ### L'immagine delle anteprime social
@@ -217,7 +263,7 @@ Va scelta, non generata a caso: il marchio su fondo blu è la strada ovvia, nel
 formato 1200×630 che le anteprime si aspettano. È una decisione di contenuto e
 di design, quindi non la prende una guardia — e per questo la suite **non**
 pretende `og:image` quando arriva il dominio: pretenderlo avrebbe aperto la
-PR 20 su un test rosso che si poteva chiudere solo inventando l'immagine.
+PR 21 su un test rosso che si poteva chiudere solo inventando l'immagine.
 Quello che la suite pretende è che, se una pagina ne pubblica una, sia assoluta.
 
 ## Minori
@@ -265,7 +311,7 @@ titoli di fila.
 
 `og:type` resta `website` anche sulle rotte delle serate, che sono
 semanticamente degli eventi. Sta in `Base.astro`, cioè nel layout condiviso, e
-il posto dove si tocca è la PR 20 insieme al resto dei meta.
+il posto dove si tocca è la PR 21 insieme al resto dei meta.
 
 ### Link a mappa per le sedi
 
@@ -295,7 +341,7 @@ regola 20 impedisce che resti così il giorno che il sito ha un dominio.
 le quattro voci con il suo *in arrivo*, come testo e non come link — un `<a>`
 senza indirizzo non è un link, e una pagina «Coming soon» sarebbe un indirizzo
 condivisibile e indicizzabile per qualcosa che non ha niente da dire, più una
-rotta che la sitemap della PR 20 dovrebbe ricordarsi di escludere.
+rotta che la sitemap della PR 21 dovrebbe ricordarsi di escludere.
 
 Resta aperto se e quando diventi una pagina vera. Il giorno che succede, la voce
 prende un `href` in `src/lib/navigation.ts` e nient'altro cambia — e finché quel

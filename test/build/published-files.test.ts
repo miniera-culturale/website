@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildFaviconIco } from '../../scripts/build-favicon.mjs';
+import { buildAppleTouchIcon, buildFaviconIco } from '../../scripts/build-favicon.mjs';
 import { checkDesignRuntimeArtifacts } from '../guards/artifacts.ts';
 import { checkItalianDataAttributes } from '../guards/language.ts';
 import { checkNoReactRuntime } from '../guards/react.ts';
@@ -67,6 +67,17 @@ describe('what the build publishes', () => {
     // work the first time someone builds on another platform.
     const { bytes } = await buildFaviconIco();
     expect(readBytes('dist/favicon.ico').equals(bytes)).toBe(true);
+  });
+
+  it('publishes the apple-touch-icon the current drawing produces', () => {
+    // The same pact as the .ico above, for the file PR 19 added. Without it the
+    // promise in the script — that generating the icon is not a step somebody
+    // has to remember — held for one of the two files and not the other: edit
+    // favicon.svg, commit without building, and iOS goes on putting the
+    // superseded drawing on the Home screen with nothing saying so.
+    return buildAppleTouchIcon().then((bytes) => {
+      expect(readBytes('dist/apple-touch-icon.png').equals(bytes)).toBe(true);
+    });
   });
 
   it('publishes a robots.txt that agrees with whether the site has a domain', () => {

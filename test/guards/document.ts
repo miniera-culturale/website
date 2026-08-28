@@ -203,12 +203,12 @@ const ALWAYS = [
  * until `site` is set in astro.config.mjs there is no domain to build one from
  * — a relative value there is not resolved by WhatsApp or Facebook, and in the
  * markup it looks perfectly fine. So it is required exactly when the site knows
- * its own address, which is what makes this turn red *by itself* the day PR 20
+ * its own address, which is what makes this turn red *by itself* the day PR 21
  * sets it.
  *
  * `og:image` is deliberately **not** in that list. It needs a picture, not a
  * domain, and this repository has none: requiring it with the domain would have
- * meant PR 20 opening on a red suite it could only fix by inventing an asset
+ * meant PR 21 opening on a red suite it could only fix by inventing an asset
  * nobody has chosen — see docs/questioni-aperte.md. What is checked is the half
  * that is checkable: if a page does publish one, it must be absolute, because a
  * relative `og:image` is the silent version of having none.
@@ -248,7 +248,7 @@ export function checkOpenGraph(
   if (!url || !/^https?:\/\//i.test(url)) {
     violations.push({
       rule: 'document',
-      detail: `${path}: \`site\` is set in astro.config.mjs but there is no absolute \`og:url\`. The domain is what it was waiting for — see PR 20`,
+      detail: `${path}: \`site\` is set in astro.config.mjs but there is no absolute \`og:url\`. The domain is what it was waiting for — see PR 21`,
     });
   }
 
@@ -474,6 +474,179 @@ export function checkSkipLinkStyle(css: string, path = 'the published CSS'): Vio
       rule: 'document',
       detail: `${path}: no \`.skip-link:focus\` rule brings the link back into view. Tabbing onto a link nobody can see is worse than not having one`,
     });
+  }
+
+  return violations;
+}
+
+/**
+ * The three things a page is only ever caught missing by looking at it.
+ *
+ * `theme-color` paints the browser's own bar; `color-scheme` tells the engine
+ * the page is dark, so the scrollbars and the form controls do not arrive white
+ * on a night-blue site; `apple-touch-icon` is what iOS puts on the Home screen
+ * instead of a shrunken screenshot of the page. None of the three fails
+ * anything when it is gone — which is exactly the layout's kind of promise, and
+ * the reason PR 19 found all three missing at once by opening the site on a
+ * phone rather than by running the suite.
+ *
+ * The value is read, not just the presence of the tag: `theme-color` with an
+ * empty content is a tag that satisfies a search and paints nothing.
+ */
+export function checkDocumentChrome(
+  markup: string,
+  path = 'the page',
+  published?: readonly string[],
+): Violation[] {
+  const clean = readableMarkup(markup);
+  const violations: Violation[] = [];
+
+  const meta = (name: string): string | undefined => {
+    for (const tag of clean.match(/<meta\b[^>]*>/gi) ?? []) {
+      if ((attributeOf(tag, 'name') ?? '').toLowerCase() === name) {
+        return (attributeOf(tag, 'content') ?? '').trim();
+      }
+    }
+    return undefined;
+  };
+
+  const themeColour = meta('theme-color');
+  if (!themeColour) {
+    violations.push({
+      rule: 'document',
+      detail: `${path}: no \`theme-color\`, so the browser's own bar stays grey above a page that is not — it is the first thing a reader sees on a phone, and nothing else in the suite can see it`,
+    });
+  }
+
+  const scheme = meta('color-scheme');
+  if (!scheme) {
+    violations.push({
+      rule: 'document',
+      detail: `${path}: no \`color-scheme\`, so scrollbars, form controls and the dialog backdrop are drawn light over a dark site`,
+    });
+  } else if (!/\bdark\b/i.test(scheme)) {
+    violations.push({
+      rule: 'document',
+      detail: `${path}: \`color-scheme\` is \`${scheme}\`, which does not name \`dark\` — this site has one surface and it is dark`,
+    });
+  }
+
+  const icon = (clean.match(/<link\b[^>]*>/gi) ?? []).find(
+    (tag) => (attributeOf(tag, 'rel') ?? '').toLowerCase().trim() === 'apple-touch-icon',
+  );
+  const href = icon ? (attributeOf(icon, 'href') ?? '').trim() : '';
+  if (!href) {
+    violations.push({
+      rule: 'document',
+      detail: `${path}: no \`apple-touch-icon\`, so iOS puts a shrunken screenshot of the page on the Home screen — here a full-screen scene, which is a blue smudge`,
+    });
+  } else if (published) {
+    /* Named is not the same as there. An `href` pointing at a file nobody
+       publishes leaves iOS doing exactly what the message above describes,
+       with this guard answering «fine» — which is the shape of guard this
+       repository keeps catching. `checkInternalLinks` asks the same question
+       of every internal address, and this asks it of the one link that is not
+       an address a reader ever follows. */
+    const wanted = href.replace(/^\//, '').split(/[?#]/)[0] ?? '';
+    const found = published.some(
+      (file) => file.split('\\').join('/').replace(/^\//, '') === wanted,
+    );
+    if (!found) {
+      violations.push({
+        rule: 'document',
+        detail: `${path}: the \`apple-touch-icon\` points at \`${href}\`, which is not among the published files — iOS falls back to a screenshot of the page and nothing else notices`,
+      });
+    }
+  }
+
+  return violations;
+}
+
+/**
+ * The colour of the browser's own bar is the one the page is painted in.
+ *
+ * `theme-color` cannot read a custom property — a `<meta>` has nowhere to read
+ * one from — so the value is written out, and a written-out colour is rule 9's
+ * whole subject: right the day it is typed and wrong the day the token it
+ * copies is retuned. What cannot be removed can at least be held together, the
+ * way the favicon is: the two are compared here, on the published page and the
+ * published stylesheet, so they cannot drift in silence.
+ */
+export function checkThemeColour(
+  markup: string,
+  css: string,
+  path = 'the page',
+): Violation[] {
+  /* `metaTags` is what every other guard in this file reads a `<meta>` with,
+     and reading it another way is how two answers to one question start. */
+  const declared = (metaTags(readableMarkup(markup)).get('theme-color') ?? '')
+    .trim()
+    .toLowerCase();
+  if (!declared) return [];
+
+  /* The page's ground, by the name the tokens give it. Read from the published
+     CSS so that what is compared is what the browser gets. */
+  const token = /--blue-700\s*:\s*([^;}]+)/.exec(css)?.[1]?.trim().toLowerCase();
+  if (!token) return [];
+
+  if (declared !== token) {
+    return [
+      {
+        rule: 'document',
+        detail: `${path}: \`theme-color\` is \`${declared}\` while \`--blue-700\`, the ground this page is painted in, is \`${token}\`. The bar of the browser is the one part of the site painted by a copy of a token, and this is the day the copy stopped agreeing`,
+      },
+    ];
+  }
+  return [];
+}
+
+/**
+ * Every scene carries the name of its evening, and it is the same name the
+ * evening's own route publishes as its `<title>`.
+ *
+ * The scroller writes `data-title` into `document.title` as the reader passes
+ * from one evening to the next — rule 16 asks the address to follow, and until
+ * PR 19 the title did not, so a bookmark taken halfway down the archive saved
+ * «/78» under the name «Il programma». Two copies of a name are two names the
+ * day one is edited, and this is what stops them: the attribute and the title
+ * are both `eveningTitle()`, and here they are compared as published.
+ */
+export function checkSceneTitles(
+  pages: readonly { path: string; markup: string }[],
+): Violation[] {
+  const violations: Violation[] = [];
+
+  /* What each route publishes as its own title, by evening number. */
+  const titles = new Map<string, string>();
+  for (const { path, markup } of pages) {
+    const number = /(?:^|\/)(\d+)(?:\/index\.html|\.html)?$/.exec(path)?.[1];
+    if (!number) continue;
+    const title = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(markup)?.[1]?.trim();
+    if (title) titles.set(number, title);
+  }
+
+  for (const { path, markup } of pages) {
+    for (const tag of readableMarkup(markup).match(/<section\b[^>]*data-scene[^>]*>/gi) ?? []) {
+      const number = (attributeOf(tag, 'data-number') ?? '').trim();
+      const name = (attributeOf(tag, 'data-title') ?? '').trim();
+      if (!number) continue;
+
+      if (!name) {
+        violations.push({
+          rule: 'scene',
+          detail: `${path}: evening ${number} has no \`data-title\`, so the scroller has no name to put in the tab as the reader arrives — the address would follow the evening and the title would not`,
+        });
+        continue;
+      }
+
+      const published = titles.get(number);
+      if (published && published !== name) {
+        violations.push({
+          rule: 'scene',
+          detail: `${path}: evening ${number} carries \`data-title="${name}"\` while its own route /${number} is titled «${published}» — one evening with two names is the drift this attribute exists to prevent`,
+        });
+      }
+    }
   }
 
   return violations;

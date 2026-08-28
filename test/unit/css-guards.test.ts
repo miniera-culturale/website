@@ -17,6 +17,8 @@ import {
   checkUndefinedCustomProperties,
   splitSupports,
   stripComments,
+  checkPrintStyles,
+  checkTickTouchTarget,
 } from '../guards/css.ts';
 
 const GOOD_SCENE = `
@@ -500,5 +502,50 @@ describe('parsing helpers', () => {
     const { outside, blocks } = splitSupports(css);
     expect(blocks).toHaveLength(1);
     expect(outside).toContain('.after');
+  });
+});
+
+describe('checkPrintStyles', () => {
+  it('says nothing when a print block is there', () => {
+    expect(checkPrintStyles('@media print{:root{color-scheme:light}}')).toEqual([]);
+  });
+
+  it('fires on a stylesheet with no print block — the state before PR 19', () => {
+    expect(checkPrintStyles('.scroller{height:100svh}')).toHaveLength(1);
+  });
+
+  it('is not satisfied by the word print inside a comment', () => {
+    expect(checkPrintStyles('/* @media print goes here one day */ .a{color:red}')).toHaveLength(1);
+  });
+
+  it('accepts a print block that arrives with other conditions on it', () => {
+    expect(checkPrintStyles('@media only print and (min-resolution:300dpi){.a{color:#000}}')).toEqual([]);
+  });
+});
+
+describe('checkTickTouchTarget', () => {
+  it('says nothing when the tick is written as the target itself', () => {
+    const css = ':root{--tap-target:44px;--timeline-tick-height:var(--tap-target)}';
+    expect(checkTickTouchTarget(css)).toEqual([]);
+  });
+
+  it('fires on the 36px the tick carried before PR 19', () => {
+    const css = ':root{--tap-target:44px;--timeline-tick-height:36px}';
+    const violations = checkTickTouchTarget(css);
+    expect(violations).toHaveLength(1);
+    expect(violations[0]?.detail).toContain('36px');
+  });
+
+  it('says nothing when the tick is written in pixels but big enough', () => {
+    expect(checkTickTouchTarget(':root{--tap-target:44px;--timeline-tick-height:48px}')).toEqual([]);
+  });
+
+  it('says nothing when there is no tick to talk about', () => {
+    expect(checkTickTouchTarget(':root{--tap-target:44px}')).toEqual([]);
+  });
+
+  it('is not fooled by the two tokens sitting inside a comment', () => {
+    const css = '/* --timeline-tick-height: 12px is what it used to be */ :root{--tap-target:44px;--timeline-tick-height:var(--tap-target)}';
+    expect(checkTickTouchTarget(css)).toEqual([]);
   });
 });

@@ -11,19 +11,20 @@
  * unclipped photo.
  *
  * `og:url` and `og:image` appear only once `site` is set in astro.config.mjs.
- * The domain has not been bought yet — PR 20 — and a relative URL in an Open
+ * The domain has not been bought yet — PR 21 — and a relative URL in an Open
  * Graph tag is not resolved by WhatsApp or Facebook: it would look right in the
  * markup and produce a preview with no picture. A test asks for `og:url` as
- * soon as `site` is there, so PR 20 does not have to remember it.
+ * soon as `site` is there, so PR 21 does not have to remember it.
  *
  * `og:image` is not asked for in the same breath, and that is deliberate: it
  * needs a picture rather than a domain, and this repository has none yet. A
- * test demanding it the day the domain arrives would open PR 20 on a red suite
+ * test demanding it the day the domain arrives would open PR 21 on a red suite
  * fixable only by inventing an asset nobody has chosen — docs/questioni-aperte.md
  * carries that decision instead. What is checked is that a page which does
  * publish one publishes it absolute.
  */
 import '../styles/global.css';
+import '../styles/print.css';
 import ClipShapes from '../components/ClipShapes.astro';
 import CycleAccents from '../components/CycleAccents.astro';
 import SiteNav from '../components/SiteNav.astro';
@@ -72,7 +73,7 @@ const {
   noindex = false,
 } = Astro.props;
 
-/* Absolute, or absent. Astro.site is undefined until PR 20 sets it. */
+/* Absolute, or absent. Astro.site is undefined until PR 21 sets it. */
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
 const preview = Astro.site && image ? new URL(image, Astro.site).href : undefined;
 ---
@@ -98,8 +99,21 @@ const preview = Astro.site && image ? new URL(image, Astro.site).href : undefine
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex, follow" />}
 
+    {/* The three that are only noticed by looking, and that PR 19 went looking
+        for. `theme-color` paints the browser's own bar in the brand's blue
+        instead of leaving it grey above a dark blue page. `color-scheme` tells
+        the engine this is a dark surface, so the scrollbars, the form controls
+        and the `<dialog>` backdrop come dark instead of arriving white on a
+        night-blue site. `apple-touch-icon` is what iOS puts on the Home screen:
+        without it, it shrinks a screenshot of the page — which here is a
+        full-screen scene, so a blue smudge. All three are the layout's kind of
+        thing: forgotten, nothing fails. */}
+    <meta name="theme-color" content="#003049" />
+    <meta name="color-scheme" content="dark" />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     {canonical && <link rel="canonical" href={canonical} />}
 
     <meta property="og:type" content="website" />
