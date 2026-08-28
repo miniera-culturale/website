@@ -89,7 +89,7 @@ sostituisce un telefono vero.
 | 17 | Messa in linea | `messa-in-linea` | fatta |
 | 18 | Proporzioni su schermo piccolo | `proporzioni-mobile` | fatta |
 | 19 | Controllo qualità | `controllo-qualita` | fatta |
-| 20 | La barra del tempo che sta al centro, e si muove | `timeline-centrata` | da fare |
+| 20 | La barra del tempo che sta al centro, e si muove | `timeline-centrata` | fatta |
 | 21 | Il dominio | `dominio` | da fare |
 
 > **E di nuovo alla PR 19**, che è quella che ha guardato il sito su un
@@ -3171,71 +3171,110 @@ centrano, le prime e le ultime no — e **la serata su cui il sito si apre è la
 prossima futura**, cioè quasi sempre l'ultima o la penultima dell'elenco. Il
 caso che sbaglia è il caso normale.
 
-Il rimedio è dare alla striscia lo spazio che le manca: un padding laterale di
-metà barra, o `scroll-padding` con `scroll-snap-align: center` sulle tacche. Con
-il padding, `reveal()` può restare l'aritmetica che è già.
+Il rimedio è dare alla striscia lo spazio che le manca. **Scritto `50%` non
+funziona**, e sembra funzionare: su una scatola `width: max-content` la
+percentuale si risolve sul contenuto della scatola, quindi lo spazio cresce con
+l'archivio — misurato su Firefox 154, tre volte le tacche danno tre volte il
+padding. Sette serate fanno 302 px per lato e sembrano giuste; ottantuno ne
+farebbero circa 3500. Si scrive come mezza barra vera, `calc(50vw -
+var(--space-3))`, e `reveal()` resta l'aritmetica che è già.
 
-### Le animazioni: quali si aggiungono e quale non si tocca
+### Le animazioni: quali si aggiungono, e la decisione che è stata rivista
 
-Quello che oggi si muove: il colore di una tacca, la sua misura, la larghezza
-del segno, il fondo della pillola corrente — tutte transizioni CSS che ci sono
-già. Quello che **non** si muove è lo scorrimento della barra: `reveal()` scrive
-`scrollLeft +=`, e un'assegnazione diretta a `scrollLeft` è istantanea per
-specifica, qualunque cosa dica il foglio di stile. È lì che sta la sensazione
-che non succeda niente: la barra si riposiziona di colpo mentre la pagina salta.
+Quello che si muoveva già: il colore di una tacca, la sua misura, la larghezza
+del segno, il fondo della pillola corrente. Quello che **non** si muoveva era lo
+scorrimento della barra — e la ragione scritta qui era sbagliata. Diceva che
+`reveal()` scrive `scrollLeft +=` e che «un'assegnazione diretta è istantanea per
+specifica, qualunque cosa dica il foglio di stile». **Non lo è**: per CSSOM-View
+il setter scorre con il behavior «auto», che è il valore calcolato di
+`scroll-behavior`. Alla barra mancava la proprietà, non la chiamata.
 
-Si aggiungono, e nessuna tocca una decisione presa:
+Si aggiungono:
 
-- **lo scorrimento della barra**, passando da `scrollLeft +=` a `scrollTo({ left })`
-  **senza `behavior`**, con `scroll-behavior: smooth` dichiarato su
-  `[data-timeline]` nel foglio di stile. È la forma che il messaggio di
-  `checkSmoothScrollArgument` prescrive con queste parole: *«Declare
-  scroll-behavior: smooth in the stylesheet and call the scroll with no behavior
-  at all»*. Passa da sola sotto `prefers-reduced-motion`, perché `global.css`
-  dichiara `scroll-behavior: auto !important`;
-- **la pressione**, che sul telefono è l'unico riscontro che il dito ha ricevuto:
-  `:active` sulla tacca, che è l'unico stato che questo design system possiede;
-- **l'arrivo**, cioè la pillola che prende la sua forma nella nuova posizione:
-  già transizionata, ma va guardata mentre la barra si muove sotto.
+- **lo scorrimento della barra**: `scroll-behavior: smooth` su `[data-timeline]`,
+  e `reveal()` che chiama `scrollTo({ left })` **senza `behavior`** — una forma
+  che si legge come istantanea mentre fa quello che dice il foglio di stile è la
+  frase che ha ingannato questo piano. Passa da sola sotto
+  `prefers-reduced-motion`, perché `global.css` dichiara
+  `scroll-behavior: auto !important`;
+- **la pressione**, che sul telefono è l'unico riscontro che il dito riceve:
+  `:active` sulla tacca, con `scale(0.94)` invece del `translateY(2px)` del resto
+  del sito — in una riga di pillole affiancate scendere si legge come uno
+  scivolamento;
+- **il salto alla serata**, che nella prima stesura di questo piano non si
+  toccava.
 
-**Non si tocca il salto alla serata.** Resta istantaneo, ed è la regola 15: un
-salto animato è interrompibile, un secondo salto partito mentre il primo è in
-volo viene lasciato cadere dal motore, e quello che resta è la pagina su una
-serata mentre rotaia, accento e indirizzo ne dicono un'altra. La PR 8 l'aveva
-spedito, la PR 9 l'ha riprodotto e tolto. **Se quello che il committente vuole è
-proprio lo scorrimento animato della pagina, quella è una decisione da rivedere
-con una ragione nuova, e va discussa prima** — non è una taratura di questo
-passo. Due tacche toccate a due decimi di distanza sono ancora la prova che
-serve a smontarla.
+**La decisione della PR 9 è stata rivista, ed è stata discussa prima** come
+questo piano chiedeva. La ragione nuova è il giudizio del committente su ciò che
+ha guardato: quello che manca non è dove sta la barra, è che premendo una tacca
+non si muove niente e il sito sembra non aver risposto. Torna quindi
+`scroll-behavior: smooth` su `[data-scroller]` — **come proprietà, mai come
+argomento**, che è la forma che la regola 15 prescriveva per il giorno in cui
+fosse tornata.
+
+Quello che la PR 9 aveva misurato non si evita: si corregge. Dopo un salto, a
+scorrimento fermo, si confronta l'atterraggio con la destinazione e lo si mette a
+posto se non combaciano. Evitare quel difetto si poteva solo rinunciando a
+muoversi; correggerlo costa una funzione.
+
+### Quello che la riproduzione ha trovato, e che non era previsto
+
+Prima di scrivere il rimedio, il difetto della PR 9 è stato ripreso in mano su un
+motore vero. Non si riproduce più su Firefox 154: a 40, 60, 80, 100 e 200 ms di
+distanza il secondo salto ridirige sempre. Solo a 30 ms il secondo tocco viene
+perso. Su Chrome non si è potuto misurare — la scheda del pannello di anteprima è
+nascosta, e uno scorrimento animato non avanza in una scheda nascosta — e Safari
+resta il motore che non si vede finché il sito non è pubblicato. La verifica
+dell'atterraggio resta, ed è un'assicurazione: va chiamata così.
+
+Quella stessa scheda nascosta però ha trovato un difetto vero, che sarebbe stato
+spedito: **con la proprietà dichiarata, `/85` aperto in una scheda di sfondo apre
+la serata 78**, la cima dell'archivio. Il salto d'apertura è un'assegnazione
+diretta, quindi anche lui prende la proprietà, e uno scorrimento animato non
+avanza mentre la scheda è nascosta. Il salto d'apertura e la correzione
+dell'atterraggio mettono da parte la proprietà per il loro solo scorrimento. Non
+`behavior: 'instant'`: `behavior` è un enum WebIDL e un valore che il motore non
+conosce **lancia**, portandosi via il salto proprio sui motori più vecchi che il
+progetto dichiara di sostenere.
 
 ### Obiettivi
 
-- [ ] La serata corrente sta al centro della barra a ogni posizione
+- [x] La serata corrente sta al centro della barra a ogni posizione
       dell'archivio, prima e ultima comprese — misurato, non guardato
-- [ ] La barra scorre con un movimento visibile invece che di scatto, e sotto
+- [x] La barra scorre con un movimento visibile invece che di scatto, e sotto
       `prefers-reduced-motion` torna istantanea
 - [ ] Premere una tacca dà un riscontro immediato al dito
-- [ ] Il salto alla serata resta istantaneo, e `checkSmoothScrollArgument` resta
-      verde
+- [x] Il salto alla serata si muove e atterra sempre sulla serata che rotaia,
+      accento, indirizzo e titolo dicono
+- [x] Il lettore che riprende in mano lo scorrimento non viene strattonato
+- [x] `/85` aperto in una scheda di sfondo apre la serata 85
+- [x] `checkSmoothScrollArgument` è verde e non è stato allentato
 - [ ] Le righe della matrice che riguardano la barra sono ripercorse su un
       telefono vero
 
 ### Test automatici
 
 - **Guardia**: la striscia dichiara lo spazio che permette a una tacca di
-  arrivare al centro — letta sul CSS pubblicato, perché è una misura che il
-  minificatore tocca
-- **Guardia**: `reveal()` non assegna `scrollLeft` direttamente, che è la forma
-  che nessun foglio di stile può raggiungere — è `checkSmoothScrollArgument` al
-  contrario, e vale la stessa ragione
+  arrivare al centro — `checkCentringSpace`, letta sul CSS pubblicato, perché è
+  una misura che il minificatore tocca
+- **Guardia**: nessuno scorrimento si scrive con un'assegnazione diretta senza
+  mettere da parte la proprietà per quella riga — `checkBareScrollWrite`. È
+  `checkSmoothScrollArgument` al contrario: là l'argomento che il foglio di stile
+  non raggiunge, qui la forma che sembra non farsi raggiungere e invece si fa
+  raggiungere
+- Sul CSS pubblicato: `[data-scroller]` dichiara `scroll-behavior: smooth`, e il
+  `scroll-behavior: auto !important` di `prefers-reduced-motion` è sopravvissuto
+  al minificatore
 - La suite intera e `npm run test:mutate` restano verdi
 
 ### Test manuali
 
 Su un telefono vero, che è da dove il difetto è arrivato: la prima serata
 dell'archivio, l'ultima, e una nel mezzo; il movimento della barra premendo una
-tacca lontana; la pressione con il dito; e lo stesso giro con la riduzione del
-movimento attiva.
+tacca lontana; la pressione con il dito; il dito che riprende lo scorrimento
+mentre un salto è in volo; e lo stesso giro con la riduzione del movimento
+attiva. Più due tocchi ravvicinati su due tacche lontane, che è la misura della
+PR 9.
 
 ---
 
