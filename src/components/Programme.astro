@@ -372,9 +372,31 @@ const { scenes, openIndex } = Astro.props;
       }
 
       /* A reader who has taken the scrolling back into their own hands is not
-         still travelling to where a jump was going. */
+         still travelling to where a jump was going — and is not still owed the
+         silence either. The mute goes with the destination: held, the rail
+         would sit on the evening they had asked for while they scroll past
+         three others. */
       function abandon() {
         landing = null;
+        target = null;
+        clearTimeout(timer);
+      }
+
+      /* Which evening is under the middle line, asked outright.
+         The same line the observer is given as its root margin, and asked here
+         because an observer only speaks when something *crosses* it: a scene
+         reported while the mute was on is not reported again once it lifts, so
+         after every movement there has to be somebody who simply looks. Without
+         it, a reader who took over mid-jump left the rail, the accent and the
+         address on the evening they had tapped — the contradiction of PR 9 in
+         another costume, and this one measured at PR 20. */
+      function onScreen() {
+        var middle = scroller.getBoundingClientRect().top + scroller.clientHeight / 2;
+        for (var i = 0; i < scenes.length; i++) {
+          var box = scenes[i].getBoundingClientRect();
+          if (box.top <= middle && box.bottom > middle) return i;
+        }
+        return current;
       }
 
       function settle() {
@@ -386,16 +408,22 @@ const { scenes, openIndex } = Astro.props;
 
         var index = landing;
         landing = null;
-        if (index === null) return;
 
-        var delta =
-          scenes[index].getBoundingClientRect().top - scroller.getBoundingClientRect().top;
-        if (Math.abs(delta) < 1) return; // arrived, which is the ordinary case
+        if (index !== null) {
+          var delta =
+            scenes[index].getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+          if (Math.abs(delta) >= 1) {
+            var behaviour = scroller.style.scrollBehavior;
+            scroller.style.scrollBehavior = 'auto';
+            scroller.scrollTop += delta;
+            scroller.style.scrollBehavior = behaviour;
+          }
+        }
 
-        var behaviour = scroller.style.scrollBehavior;
-        scroller.style.scrollBehavior = 'auto';
-        scroller.scrollTop += delta;
-        scroller.style.scrollBehavior = behaviour;
+        // And whatever all of that came to, said out loud. After a correction
+        // this is the destination and changes nothing; after a reader took over
+        // it is the evening they stopped on.
+        setCurrent(onScreen());
       }
 
       scroller.addEventListener(
