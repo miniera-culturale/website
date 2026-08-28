@@ -2026,12 +2026,21 @@ descrizione, i relatori, l'etichetta del ciclo, la seconda riga della sede — e
 quello che resta è l'elenco che il piano dichiara: titolo, data, luogo, bottoni,
 nota. Il ciclo continua a dirlo l'accento di tutta la schermata.
 
-**E in orizzontale la Timeline torna rotaia verticale.** La barra in basso costa
-78 px di altezza su uno schermo che ne ha 268: più di un quarto. La condizione
-della media query è passata da «schermo stretto» a «schermo stretto **e** alto
-almeno 481 px», così sotto quella soglia valgono le regole del desktop — la
-rotaia a destra, dove lo spazio in larghezza abbonda. Nessuna dichiarazione
-duplicata: è cambiata la condizione, non le regole.
+**In orizzontale la Timeline resta la barra in basso, e sono le barre a
+dimagrire.** Il primo tentativo era stato mandarla a destra come sul desktop:
+sembrava comprare 78 px di altezza, e ne portava via due cose che la revisione
+ha trovato. Lassù le tacche non hanno `--tap-target` — misurate 23 px su un
+viewport vero — e la rotaia non scorre, quindi con ottantuno serate quelle sotto
+il bordo sono ritagliate e irraggiungibili: cioè il difetto che la PR 11 esiste
+per aver risolto, riaperto per far spazio a una nota.
+
+Quello che dimagrisce è il contorno dei bersagli, mai i bersagli: sotto i 480 px
+di altezza `--nav-bar` e `--timeline-bar` si ridichiarano con un gradino di
+padding invece di due, e i due componenti si ridisegnano dalla stessa somma. Il
+dito resta a 44 px comunque si tenga il telefono. Gli ultimi trenta pixel
+arrivano dal bottone e dalla nota messi in riga invece che in colonna, e dalla
+linea sopra i fatti, che è un tratto e non un'informazione: niente si rimpicciolisce,
+smettono solo di stare in fila.
 
 **La rotella sopra una tacca muove il programma di una serata.** Le tacche hanno
 `pointer-events: auto` per restare cliccabili, e una tacca che cattura la
