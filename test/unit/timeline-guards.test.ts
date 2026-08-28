@@ -7,7 +7,11 @@
  * it, nothing else here fails.
  */
 import { describe, expect, it } from 'vitest';
-import { checkTimelineLinks, checkTimelineTargets } from '../guards/timeline.ts';
+import {
+  checkRailHoldsTheArchive,
+  checkTimelineLinks,
+  checkTimelineTargets,
+} from '../guards/timeline.ts';
 
 const SCENES = `
   <section id="serata-81" data-scene data-number="81"></section>
@@ -110,5 +114,66 @@ describe('checkTimelineTargets', () => {
 
   it('says nothing about a page with no rail', () => {
     expect(checkTimelineTargets('<main><h1>Chi siamo</h1></main>')).toEqual([]);
+  });
+});
+
+
+/* The rail that stops holding the archive.
+ *
+ * Measured at PR 21 with eighty-one simulated evenings: the strip came to 696px
+ * against 558px of rail on a window 650px tall, and twenty-two ticks fell
+ * outside — clipped by `overflow: hidden`, present in the markup, invisible and
+ * unclickable. It is the defect PR 11 exists to have fixed, arriving on the
+ * desktop with the real archive rather than with the seven evenings there are
+ * today, which is why nothing has ever shown it.
+ */
+describe('checkRailHoldsTheArchive', () => {
+  const CONSTRAINED = '.timeline-strip { display: flex; max-height: 100%; }';
+  const SHRINKABLE = '.timeline-tick:not([data-near]) { flex: 0 1 6px; min-height: 0; }';
+
+  it('accepts a rail whose strip is constrained and whose far ticks give way', () => {
+    expect(checkRailHoldsTheArchive(`${CONSTRAINED}
+${SHRINKABLE}`)).toEqual([]);
+  });
+
+  it('reports the pitch written as padding, which cannot shrink', () => {
+    // What the CSS looked like from PR 11 to PR 21, and it reads perfectly.
+    const padded = `${CONSTRAINED}
+.timeline-tick:not([data-near]) { margin-block: 0; padding-block: 2px; }`;
+    const violations = checkRailHoldsTheArchive(padded, 'dist/index.html');
+    expect(violations).toHaveLength(1);
+    expect(violations[0]!.detail).toContain('dist/index.html');
+    expect(violations[0]!.detail).toContain('flex: 0 1 6px');
+  });
+
+  it('reports a strip with nothing to shrink against', () => {
+    const loose = `.timeline-strip { display: flex; }
+${SHRINKABLE}`;
+    const violations = checkRailHoldsTheArchive(loose);
+    expect(violations).toHaveLength(1);
+    expect(violations[0]!.detail).toContain('max-height: 100%');
+  });
+
+  it('does not take a flex that refuses to shrink for one that does', () => {
+    for (const declaration of ['flex: none', 'flex: 0 0 6px', 'flex-shrink: 0']) {
+      const refuses = `${CONSTRAINED}
+.timeline-tick:not([data-near]) { ${declaration}; }`;
+      expect(checkRailHoldsTheArchive(refuses), declaration).toHaveLength(1);
+    }
+  });
+
+  it('reads the shorthand the way the cascade does', () => {
+    // `flex: 1` leaves the shrink factor at 1, and `flex: 0 6px` too: one
+    // number is the grow factor, and only a second one is the shrink.
+    for (const declaration of ['flex: 1', 'flex: 0 6px', 'flex: 0 1 6px', 'flex: auto']) {
+      const gives = `${CONSTRAINED}
+.timeline-tick:not([data-near]) { ${declaration}; }`;
+      expect(checkRailHoldsTheArchive(gives), declaration).toEqual([]);
+    }
+  });
+
+  it('says nothing about a page that carries no rail', () => {
+    expect(checkRailHoldsTheArchive('.scene { color: red; }')).toEqual([]);
+    expect(checkRailHoldsTheArchive('')).toEqual([]);
   });
 });

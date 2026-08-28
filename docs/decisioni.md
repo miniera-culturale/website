@@ -60,9 +60,9 @@ forte di dirlo. *(PR 17)*
 non toglie un indirizzo dall'indice: dice al crawler di non *leggere* la pagina,
 e una pagina non letta è una pagina il cui `noindex` non si vede mai — quindi
 l'indirizzo nudo può finire in elenco lo stesso. Il `noindex` ce l'hanno già ed
-è quello che funziona; la sitemap della PR 21 è l'altra metà. Il piano diceva il
+è quello che funziona; la sitemap della PR 22 è l'altra metà. Il piano diceva il
 contrario, e oggi non cambierebbe niente perché `Disallow: /` copre tutto: il
-difetto si pubblicherebbe alla PR 21. *(PR 17)*
+difetto si pubblicherebbe alla PR 22. *(PR 17)*
 
 **La CSP si genera dal pubblicato, non si scrive a mano.** Questo sito non ha
 nemmeno uno script esterno: sono tutti `is:inline`, per quattro decisioni
@@ -514,7 +514,7 @@ per come è formattato un file invece che per quello che dice.
 
 **`og:image`, invece, non lo pretende, e non è una svista.** Ha bisogno di
 un'immagine, non di un dominio, e il repository non ne ha una: chiederlo insieme
-a `og:url` avrebbe aperto la PR 21 su una suite rossa che si poteva chiudere
+a `og:url` avrebbe aperto la PR 22 su una suite rossa che si poteva chiudere
 solo inventando un asset che nessuno ha scelto — cioè un test che detta una
 decisione di contenuto. La decisione sta in
 [questioni-aperte.md](questioni-aperte.md); quello che la suite controlla è che
@@ -958,7 +958,7 @@ ciclo viene ritarato nel CMS, indicando un file di test invece del contenuto che
 `CLAUDE.md` dice che per lo stile guardare il sorgente non basta, quindi una
 rassegna viva solo in `npm run dev` lascerebbe le varianti di ogni componente
 verificate da nessuna parte. Fuori dall'indice perché è una pagina di servizio —
-e la sitemap della PR 21 dovrà escluderla. Non `/rassegna`, che è della rassegna
+e la sitemap della PR 22 dovrà escluderla. Non `/rassegna`, che è della rassegna
 stampa della PR 13.
 
 ## Forme di ritaglio, la geometria
@@ -1428,7 +1428,7 @@ mai messo in cache: è qualcuno che chiede di un altro giorno, e rispondergli
 dalla memoria risponderebbe a un'altra domanda. *(PR 9, in revisione)*
 
 **L'immagine da anteprima si genera solo quando c'è il dominio.** Prima si
-generava comunque, con l'argomento che alla PR 21 non ci fosse niente da
+generava comunque, con l'argomento che alla PR 22 non ci fosse niente da
 ricordarsi — e il costo si vedeva in `dist/`: un JPEG per serata che nessuna
 pagina referenziava, cioè ottantuno ridimensionamenti e ottantuno file morti in
 ogni deployment con l'archivio pieno. La promessa regge lo stesso: arriva il
@@ -1562,7 +1562,7 @@ link, e in un menu è una voce che sembra attiva e non lo è — la stessa mezza
 verità dell'`aria-disabled` su un `<a>` senza indirizzo, tolta alla PR 6. È
 testo, con accanto il suo *in arrivo*. E niente pagina: sarebbe un indirizzo
 condivisibile e indicizzabile per qualcosa che non ha niente da dire, più una
-rotta che la sitemap della PR 21 dovrebbe ricordarsi di escludere. *(PR 13)*
+rotta che la sitemap della PR 22 dovrebbe ricordarsi di escludere. *(PR 13)*
 
 **Ogni link interno pubblicato deve trovare la sua pagina in `dist/`**,
 `checkInternalLinks`: la sorella di `checkEveningRoutes`, e il motivo per cui la
@@ -1612,7 +1612,7 @@ rende la sostituzione un file solo invece di una caccia — il componente
 `data-placeholder` che la guardia legge, e con `site` impostato in
 `astro.config.mjs` un solo blocco marcato in `dist/` è una violazione. È
 l'interruttore di `og:url`, armato dalla configurazione e non dalla memoria di
-qualcuno: **la PR 21 non chiude finché i testi veri non ci sono**, ed è voluto —
+qualcuno: **la PR 22 non chiude finché i testi veri non ci sono**, ed è voluto —
 un dominio vero con un lorem ipsum sopra è l'unica cosa peggiore di non avere il
 dominio. *(PR 13)*
 
@@ -1757,7 +1757,7 @@ perché le due si sommano e la classica continuerebbe a bloccare il CMS:
 
 Due e non uno, perché il bypass si dà a un ruleset e non a una regola: con uno
 solo, il team che salva dal CMS potrebbe anche riscrivere la storia di `main`. Il
-bypass è a un **team** e non a un account perché alla PR 21 il CMS entra in OAuth
+bypass è a un **team** e non a un account perché alla PR 22 il CMS entra in OAuth
 e commetta con l'identità di chi ha fatto l'accesso — chi sta in quel team è una
 voce di [questioni-aperte.md](questioni-aperte.md). I ruleset puntano a
 `~DEFAULT_BRANCH` e non a `refs/heads/main`, così seguono il branch predefinito
@@ -2062,6 +2062,63 @@ sotto la metà. Due leve insieme — 72% di altezza e il centro spostato di uno
 spazio verso sinistra, dentro il gap della colonna dove il posto c'è — la
 riportano tutta dentro senza toccare né la forma né l'inclinazione, che sono del
 marchio.
+
+## La rotaia che regge l'archivio
+
+**La rotaia non conteneva l'archivio, e nessuno poteva vederlo.** Con ottantuno
+serate simulate su Firefox 154: a una finestra di 800 px la striscia passava per
+dodici pixel, a 650 px erano 696 px di striscia in 558 di rotaia con **22 tacche
+fuori dal bordo**, a 460 px cinquantaquattro. Fuori dal bordo vuol dire
+ritagliate — `overflow: hidden`, e sul desktop la rotaia non scorre — quindi
+presenti nel markup, invisibili e non cliccabili. È il difetto che la PR 11
+esiste per aver chiuso, che ritorna sul desktop con l'archivio vero. Non si
+vedeva perché il sito ha sette serate: la PR 11 aveva provato la finestra di
+tacche con un contenuto finto da 81 serate, ma su una schermata alta, dove ci
+sta. *(PR 21)*
+
+**Due righe che si tenevano a vicenda.** La rotaia era una griglia con
+`align-content: center`, e una riga di griglia si dimensiona sul contenuto:
+niente costringeva la striscia, e un `max-height: 100%` scritto lì non si sarebbe
+risolto contro niente. Il passo delle tacche lontane era `padding`, che non si
+stringe. La striscia poteva soltanto crescere. Adesso la rotaia è una colonna
+flex con un'altezza definita e il passo è una base flex restringibile,
+`flex: 0 1 6px` — gli stessi sei pixel, ed è ancora la scatola, quindi prende
+ancora il clic, che è quello che la PR 11 aveva ottenuto spostando il passo da
+margine a padding. *(PR 21)*
+
+**Cedono e non crescono.** `flex: 0 1` e non `flex: 1`: con venti o quaranta
+serate lo spazio c'è, e le tacche che si allargassero a riempirlo sarebbero una
+rotaia diversa da quella disegnata. Misurato: a venti e a quaranta serate il
+passo resta esattamente sei. *(PR 21)*
+
+**La consegna alla barra sotto una soglia è stata progettata e non spedita.**
+Doveva essere la seconda leva. Due ragioni, trovate scrivendola. La prima è
+meccanica: Astro dà uno scope agli stili di un componente e in una `@media` non
+si può interpolare un numero della build — `define:vars` passa proprietà
+personalizzate, che una media query non legge — quindi la soglia sarebbe stata
+scritta a mano, giusta il giorno che si scrive e sbagliata l'anno dopo, con
+l'archivio che cresce di ~52 serate l'anno. La seconda pesa di più: **la barra
+costa spazio in basso, ed è dove lo spazio manca.** A 1280×500 il collaudo ha già
+registrato che il contenuto della scena esce dal bordo inferiore (QA-150); la
+rotaia costa spazio a destra, dove ce n'è. Si sarebbe peggiorato un difetto
+scritto per rimediarne un altro. *(PR 21)*
+
+**Quel che resta è dichiarato.** Sotto i ~470 px di rotaia con ottantuno serate
+il passo scende sotto i quattro pixel — a 368 px misura 0,63 — e i marchi si
+leggono come una linea: tutto l'archivio è presente e nessuna tacca è tagliata,
+ma mirare a una serata precisa diventa approssimativo. Stringere la finestra
+etichettata non basta, ed è aritmetica: 70 marchi a 4 px sono 280 px, più 89 px
+della finestra più stretta fanno 369, cioè la rotaia intera. Sta in
+questioni-aperte.md, da riguardare con l'archivio vero davanti. *(PR 21)*
+
+**E nei commenti di codice il numero di un passo diventa un nome.** Inserire la
+rotaia prima del dominio sposta il dominio alla PR 22, e con lui 69 riferimenti
+in 19 file — di cui una ventina dentro `src/` e `test/`. Nel piano e nei
+documenti i numeri restano, perché lì l'elenco *è* il documento; nei commenti
+diventano «the domain step», perché un numero scritto in un commento è la copia
+che si disallinea al primo passo inserito e non fa fallire niente. Le tre
+citazioni di una frase sbagliata in passato restano come stanno: correggere un
+verbale è falsificarlo. *(PR 21)*
 
 ## Rimandate
 

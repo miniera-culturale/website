@@ -88,7 +88,31 @@ sue regole sono per campo. Le strade sono tre, e nessuna è gratis:
 Va deciso con il committente, perché la terza è ragionevole solo se chi scrive è
 sempre la stessa persona.
 
-## Blocca la PR 21
+## Aperta dalla PR 21
+
+### La rotaia su una finestra bassa, con l'archivio vero
+
+**Aperta il 28 agosto 2026, alla PR 21.** La rotaia adesso contiene tutto
+l'archivio a ogni altezza di finestra — nessuna tacca viene più ritagliata — ma
+sotto i ~470 px di rotaia con ottantuno serate il passo dei marchi scende sotto i
+quattro pixel, e a 368 px misura 0,63: si leggono come una linea. L'archivio è
+tutto lì e nessuna serata è irraggiungibile, ma **mirare a una serata precisa
+diventa approssimativo**.
+
+Non è una taratura che manca. L'aritmetica dice che non ci sta: 70 marchi a 4 px
+sono 280 px, più gli 89 della finestra etichettata più stretta fanno 369 px, cioè
+la rotaia intera. Stringere la finestra non basta — ±3 dà 1,93 px, ±2 ne dà 2,52.
+
+Le tre strade sono tutte con un costo: lasciare la linea densa e accettare che
+lì si miri a occhio; consegnare alla barra, che però costa spazio in basso ed è
+dove il collaudo ha già trovato la scena che sborda (QA-150); o far scorrere la
+rotaia, che sarebbe un secondo contenitore scorrevole verticale e la regola 1 lo
+vieta con la sua ragione.
+
+**Si decide guardando**, e si può guardare solo quando le serate vere ci sono:
+è la stessa risposta che serve per la migrazione dell'archivio, qui sopra.
+
+## Blocca la PR 22
 
 ### I testi, i numeri e le persone delle pagine istituzionali
 
@@ -111,7 +135,7 @@ Serve dal committente, in una volta sola:
 
 **E blocca la pubblicazione, per costruzione.** Con `site` impostato in
 `astro.config.mjs` un solo blocco `data-placeholder` in `dist/` è una
-violazione: la PR 21 non può chiudere finché questa voce è aperta. È voluto e
+violazione: la PR 22 non può chiudere finché questa voce è aperta. È voluto e
 sta scritto qui perché allora non sia una sorpresa — un dominio vero con un
 lorem ipsum sopra è l'unica cosa peggiore di non avere il dominio. Se il
 committente decidesse di pubblicare comunque, la strada è togliere le sezioni
@@ -161,7 +185,7 @@ scritta:
 Resta fuori il sito **in orizzontale**, che nessuno aveva mai guardato e che non
 è una taratura: sta nella PR 19.
 
-## Da fare alla PR 21
+## Da fare alla PR 22
 
 ### L'accesso al CMS col bottone, invece che col token
 
@@ -178,7 +202,7 @@ segreto del client, perché una pagina statica non può tenerlo. L'origine è il
 sito pubblicato. Il relay è un Worker, `sveltia-cms-auth`, che Sveltia pubblica
 apposta e che sta su Cloudflare come il resto.
 
-Serve dal committente, alla PR 21 e in una volta sola: l'applicazione OAuth
+Serve dal committente, alla PR 22 e in una volta sola: l'applicazione OAuth
 sull'account GitHub dell'associazione, e il Worker sul suo account Cloudflare.
 Quello che cambia qui dentro è una riga di `public/admin/config.yml` —
 `auth_methods: [oauth, token]` con il `base_url` accanto.
@@ -186,7 +210,7 @@ Quello che cambia qui dentro è una riga di `public/admin/config.yml` —
 ### Chi sta nel team `redazione`
 
 **Aperta il 15 agosto 2026, alla PR 17.** Il bypass che fa salvare il CMS sta sul
-team `redazione` e non su un account, apposta: alla PR 21 il CMS entra in OAuth e
+team `redazione` e non su un account, apposta: alla PR 22 il CMS entra in OAuth e
 commetta con l'identità di chi ha fatto l'accesso, quindi un account «di
 redazione» sarebbe una credenziale condivisa da distribuire adesso e da ritirare
 allora.
@@ -211,7 +235,7 @@ solo quando quella riga compare.
 Da provare, allora: che l'anteprima esca con titolo, descrizione e figura, e che
 la figura sia quella della serata e non la stessa per tutte.
 
-## Da decidere prima della PR 21
+## Da decidere prima della PR 22
 
 ### Se il sito misura le visite, e cosa dice a chi lo chiede
 
@@ -227,7 +251,7 @@ Qualunque cosa lo faccia — Google Analytics per primo — porta con sé un ban
 un'informativa e un trasferimento di dati fuori dall'Unione, cioè tre cose che un
 sito statico di quartiere non ha nessun motivo di portarsi.
 
-Da decidere prima della PR 21, perché la seconda strada cambia la pagina e non la
+Da decidere prima della PR 22, perché la seconda strada cambia la pagina e non la
 configurazione. E qualunque sia la risposta, va scritta: *«non misuriamo niente»*
 è una decisione, `decisioni.md` è il posto, e il giorno che qualcuno propone uno
 script è quello che gli si mette davanti.
@@ -249,7 +273,7 @@ invece di una giornata.
 **Resta aperta l'altra metà: il progetto Cloudflare.** Va creato sull'account di
 chi possiede il sito, non su quello di chi lo costruisce, e la domanda è la
 stessa — con la differenza che qui non c'è nessun trasferimento gratuito da
-fare dopo: un progetto Pages si ricollega, ma il dominio e il Worker della PR 21
+fare dopo: un progetto Pages si ricollega, ma il dominio e il Worker della PR 22
 gli stanno attaccati.
 
 ### L'immagine delle anteprime social
@@ -263,7 +287,7 @@ Va scelta, non generata a caso: il marchio su fondo blu è la strada ovvia, nel
 formato 1200×630 che le anteprime si aspettano. È una decisione di contenuto e
 di design, quindi non la prende una guardia — e per questo la suite **non**
 pretende `og:image` quando arriva il dominio: pretenderlo avrebbe aperto la
-PR 21 su un test rosso che si poteva chiudere solo inventando l'immagine.
+PR 22 su un test rosso che si poteva chiudere solo inventando l'immagine.
 Quello che la suite pretende è che, se una pagina ne pubblica una, sia assoluta.
 
 ## Minori
@@ -311,7 +335,7 @@ titoli di fila.
 
 `og:type` resta `website` anche sulle rotte delle serate, che sono
 semanticamente degli eventi. Sta in `Base.astro`, cioè nel layout condiviso, e
-il posto dove si tocca è la PR 21 insieme al resto dei meta.
+il posto dove si tocca è la PR 22 insieme al resto dei meta.
 
 ### Link a mappa per le sedi
 
@@ -341,7 +365,7 @@ regola 20 impedisce che resti così il giorno che il sito ha un dominio.
 le quattro voci con il suo *in arrivo*, come testo e non come link — un `<a>`
 senza indirizzo non è un link, e una pagina «Coming soon» sarebbe un indirizzo
 condivisibile e indicizzabile per qualcosa che non ha niente da dire, più una
-rotta che la sitemap della PR 21 dovrebbe ricordarsi di escludere.
+rotta che la sitemap della PR 22 dovrebbe ricordarsi di escludere.
 
 Resta aperto se e quando diventi una pagina vera. Il giorno che succede, la voce
 prende un `href` in `src/lib/navigation.ts` e nient'altro cambia — e finché quel

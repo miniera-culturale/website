@@ -109,6 +109,13 @@ Fatto:
   otteneva niente. È la regola 23, con la sua guardia sui due strati, e il
   pannello del modale ha smesso di misurarsi sul viewport grande
 
+- **La rotaia regge l'archivio a ogni altezza di finestra.** Era un difetto
+  latente e invisibile con sette serate: con ottantuno, su una finestra da 650 px,
+  ventidue tacche cadevano fuori dal bordo e venivano ritagliate — presenti nel
+  markup, invisibili e non cliccabili. La striscia adesso è vincolata dalla
+  rotaia e le tacche lontane cedono invece di sfondare, senza cambiare niente
+  finché lo spazio c'è
+
 Da fare: l'elenco completo dei passi, in ordine e uno per PR, sta in
 [piano.md](piano.md). In sintesi — un controllo qualità a mano su dispositivi e
 impostazioni veri, e per ultimo il dominio, che è il solo passo che aspetta il

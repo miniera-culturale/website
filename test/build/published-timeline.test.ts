@@ -13,7 +13,12 @@
 import { describe, expect, it } from 'vitest';
 import { attributeOf } from '../guards/document.ts';
 import { checkSingleScroller, scrollableRules } from '../guards/scroller.ts';
-import { checkTimelineLinks, checkTimelineTargets, tickTags } from '../guards/timeline.ts';
+import {
+  checkRailHoldsTheArchive,
+  checkTimelineLinks,
+  checkTimelineTargets,
+  tickTags,
+} from '../guards/timeline.ts';
 import { publishedPages } from '../support/dist.ts';
 import { collectionEntries } from '../support/frontmatter.ts';
 import { sortByNumber } from '../../src/lib/events.ts';
@@ -177,6 +182,19 @@ describe('the published Timeline', () => {
     );
     expect(bar.length, 'the bar declares no scrolling at all').toBeGreaterThan(0);
     expect(bar.every((rule) => !rule.vertically)).toBe(true);
+  });
+
+  it('holds the whole archive at every height a window can have', () => {
+    /* Read in dist/, because a length is what a minifier rewrites and because
+       what makes this true is two rules that have to survive together.
+
+       It cannot be seen on this site today: with seven evenings the strip is a
+       third of the rail. Measured at PR 21 with eighty-one simulated evenings
+       on Firefox 154 — at a window 650px tall the strip came to 696px against
+       558px of rail and twenty-two ticks fell outside, clipped and unclickable;
+       at 460px, fifty-four. With the strip constrained and the far ticks able
+       to give way: nothing outside, at either height. */
+    expect(checkRailHoldsTheArchive(home!.css, HOME)).toEqual([]);
   });
 
   it('animates no jump, and can still be asked for less movement', () => {

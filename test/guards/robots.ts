@@ -7,7 +7,7 @@
  * one nobody links to. So: no domain, no indexing; domain, indexing plus the
  * sitemap. It is the switch of `og:url` and of `checkNoPlaceholders`, pointed
  * at a third thing, and it is read from the configuration rather than
- * remembered — see PR 17 and PR 21.
+ * remembered — see PR 17 and the domain step.
  *
  * And a second rule that does not flip, because it is the one that is easy to
  * get backwards: **`/admin` and `/componenti` are never `Disallow`ed.** A
@@ -17,7 +17,7 @@
  * already carry `noindex` (the gallery from PR 6, the editing desk from
  * PR 14), and that is the mechanism that works; forbidding them here would
  * switch it off. Today it changes nothing, because `Disallow: /` covers
- * everything. It changes at PR 21, which is the moment the defect would be
+ * everything. It changes when the domain arrives, which is the moment the defect would be
  * published — which is why it is written down now, while somebody is looking.
  */
 import { type Violation } from './types.ts';
@@ -72,7 +72,7 @@ export function checkRobotsIndexing(
   if (options.withDomain && blanket) {
     violations.push({
       rule: 'robots',
-      detail: `${path} still forbids the whole site with \`Disallow: /\`, and \`site\` is set in astro.config.mjs: the domain is here and the site is telling every search engine to stay out. This is the other side of the switch — see PR 21`,
+      detail: `${path} still forbids the whole site with \`Disallow: /\`, and \`site\` is set in astro.config.mjs: the domain is here and the site is telling every search engine to stay out. This is the other side of the switch — see the domain step in docs/piano.md`,
     });
   }
 
@@ -98,7 +98,7 @@ export function checkRobotsIndexing(
     if (listed !== undefined) {
       violations.push({
         rule: 'robots',
-        detail: `${path} forbids \`${listed}\`, and that keeps it in the index rather than out of it: a crawler told not to read the page never sees the \`noindex\` it carries, and can list the bare address anyway. ${noindexed} stays out by its \`noindex\` — the sitemap of PR 21 is the other half, and this line is neither`,
+        detail: `${path} forbids \`${listed}\`, and that keeps it in the index rather than out of it: a crawler told not to read the page never sees the \`noindex\` it carries, and can list the bare address anyway. ${noindexed} stays out by its \`noindex\` — the sitemap that arrives with the domain is the other half, and this line is neither`,
       });
     }
   }

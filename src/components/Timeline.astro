@@ -102,8 +102,19 @@ function rank(index: number): string | undefined {
     box-sizing: border-box;
     width: var(--timeline-width);
     height: var(--scene-height);
-    display: grid;
-    align-content: center;
+    /* A column that *constrains* what is in it, which the grid did not.
+       With `align-content: center` the row was sized to its content, so nothing
+       stopped the strip from being taller than the rail — and past the edge
+       `overflow: hidden` simply cut it. Measured at PR 21 with a simulated
+       archive of eighty-one evenings: at a window 650px tall the strip came to
+       696px against 558px of rail and **22 ticks fell outside**, clipped and
+       unclickable; at 460px, 54 of them. It is the defect PR 11 exists to have
+       fixed, arriving on the desktop with the real archive instead of with the
+       seven evenings there are today. A flex column with a definite height is
+       what lets the strip's `max-height` resolve, and the ticks shrink. */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     padding: var(--space-5) var(--space-4);
     overflow: hidden;
     pointer-events: none;
@@ -120,6 +131,10 @@ function rank(index: number): string | undefined {
     position: relative;
     display: flex;
     flex-direction: column;
+    /* Never taller than the rail. The percentage resolves because the rail
+       above is a flex column with a definite height — it did not under the
+       grid, which is why this line would have done nothing there. */
+    max-height: 100%;
   }
 
   /* The rail the ticks sit on, faded at both ends so the window does not read
@@ -179,7 +194,21 @@ function rank(index: number): string | undefined {
      tall, which is a link nobody can hit on purpose. */
   .timeline-tick:not([data-near]) {
     margin-block: 0;
-    padding-block: 2px;
+    /* The pitch as a flex basis rather than as padding, and the difference is
+       what happens when there is not enough room: padding does not shrink, so
+       the strip grew past the rail and the ends were cut off. This is the same
+       six pixels — a two-pixel mark with two either side — and it is still the
+       *box*, so it still takes the click, which is the thing PR 11 moved from
+       margin to padding to get. What is new is `1` in the middle: when the
+       archive does not fit, these give way instead of overflowing.
+
+       They shrink and never grow: with twenty or forty evenings there is room
+       to spare and the pitch stays exactly six, measured. At eighty-one on a
+       650px window it comes to 3.4px, which is a smaller target than six — and
+       the twenty-two ticks it replaces were not targets at all. */
+    padding-block: 0;
+    flex: 0 1 6px;
+    min-height: 0;
   }
 
   .timeline-tick:not([data-near]) .tick-date {

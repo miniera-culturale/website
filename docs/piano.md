@@ -90,7 +90,8 @@ sostituisce un telefono vero.
 | 18 | Proporzioni su schermo piccolo | `proporzioni-mobile` | fatta |
 | 19 | Controllo qualità | `controllo-qualita` | fatta |
 | 20 | La barra del tempo che sta al centro, e si muove | `timeline-centrata` | da fare |
-| 21 | Il dominio | `dominio` | da fare |
+| 21 | La rotaia che regge l'archivio | `rotaia-archivio` | da fare |
+| 22 | Il dominio | `dominio` | da fare |
 
 > **E di nuovo alla PR 19**, che è quella che ha guardato il sito su un
 > telefono. La barra del tempo entra come 20 e il dominio scala a 21: il numero
@@ -691,7 +692,7 @@ In breve:
 - Ogni pagina porta tutte le forme che il componente dichiara, e nessun `id`
   italiano dell'export arriva in `dist/`
 - I meta Open Graph di base ci sono, e **`og:url` e `og:image` sono pretesi
-  appena `site` è impostato**: il test si accende da solo alla PR 21
+  appena `site` è impostato**: il test si accende da solo alla PR 22
 - Il salta-a è il primo link del `<body>` e punta a un `id` che esiste — non a
   uno che gli somiglia: `#programma` non è soddisfatto da `id="programma-2"`,
   ed è il primo difetto che il caso negativo ha trovato nella guardia appena
@@ -722,7 +723,7 @@ In breve:
 > alle guardie del documento anche le pagine copiate da `public/`, cioè la
 > PR 14 non avrebbe potuto chiudere verde con la shell di Sveltia in
 > `public/admin/`; e pretendere `og:image` all'arrivo del dominio avrebbe aperto
-> la PR 21 su una suite rossa chiudibile solo inventando un'immagine che nessuno
+> la PR 22 su una suite rossa chiudibile solo inventando un'immagine che nessuno
 > ha scelto. L'immagine è una questione aperta, non un test.
 
 ### Test manuali
@@ -1357,7 +1358,7 @@ breve:
 - Ogni rotta pubblica titolo e descrizione della sua serata, non del sito, e
   `og:description` dice la stessa cosa del meta
 - **Quando `site` è impostato**, ogni rotta con una foto pubblica `og:image`
-  assoluto: scritto ora, si accende alla PR 21
+  assoluto: scritto ora, si accende alla PR 22
 - Gli `<h1>` di due rotte sono diversi, e quello della radice non nomina nessuna
   serata
 - **Guardia** `checkEveningRoutes`: ogni `data-number` pubblicato trova la sua
@@ -1437,14 +1438,14 @@ breve:
 > **l'immagine da anteprima si generava anche senza dominio**, cioè un JPEG per
 > serata che nessuna pagina referenziava. Con l'archivio pieno sono ottantuno
 > ridimensionamenti e ottantuno file morti in ogni deployment. Generarla solo
-> quando c'è il dominio non toglie niente alla promessa che alla PR 21 non ci
+> quando c'è il dominio non toglie niente alla promessa che alla PR 22 non ci
 > sia niente da ricordarsi: arriva il dominio e arrivano le immagini.
 >
 > **Due sono rimaste aperte, di proposito.** Il `<title>` di una serata non
 > nomina l'associazione, mentre quello della radice sì: è una scelta di testo
 > italiano e la si fa guardandola, non correggendola di nascosto. E `og:type`
 > resta `website` anche sulle rotte delle serate: cambiarlo è una decisione sul
-> layout condiviso, e il posto dove si prende è la PR 21, insieme al resto dei
+> layout condiviso, e il posto dove si prende è la PR 22, insieme al resto dei
 > meta.
 
 ### Test manuali
@@ -1462,7 +1463,7 @@ breve:
   20–25 KB di [vincoli-tecnici.md](vincoli-tecnici.md) — e 109 file in tutto,
   contro i 20.000 che Cloudflare Pages concede per deployment
 
-> **Rimandata alla PR 21**: l'anteprima di un link su WhatsApp e su Facebook.
+> **Rimandata alla PR 22**: l'anteprima di un link su WhatsApp e su Facebook.
 > Senza dominio non c'è niente da incollare in una chat e `og:image` non viene
 > emesso — il layout lo omette apposta, perché un URL relativo lì dentro
 > «sembra giusto nel markup e l'anteprima esce senza figura». Il test è scritto
@@ -1972,7 +1973,7 @@ breve:
   scritta per le foto. Lo copia la build, e un test confronta i byte pubblicati
   con quelli installati. `@sveltia/cms` passa quindi fra le `dependencies`
 - **L'accesso in questa PR è con token personale**, e l'OAuth entra fra gli
-  obiettivi della PR 21: ha bisogno di un'origine registrata su GitHub e di un
+  obiettivi della PR 22: ha bisogno di un'origine registrata su GitHub e di un
   relay, e l'origine non esiste finché il sito non è pubblicato
 - **Il fuso si dichiara nel CMS** — `input_timezone: Europe/Rome`,
   `output_utc: false`, `format: YYYY-MM-DDTHH:mm:ssZ` — con la sua guardia
@@ -2373,7 +2374,7 @@ nessun `.env`, nessun token. Non c'è niente da riscrivere prima di pubblicare, 
   pubblico e scansionabile — a differenza dei deploy preview, che Cloudflare
   marca da sé — e il giorno del dominio ci sarebbero due siti identici con il
   motore a sceglierne uno. Finché `site` non c'è, `robots.txt` vieta tutto; alla
-  PR 21 si inverte e prende il rimando alla sitemap. La guardia legge la stessa
+  PR 22 si inverte e prende il rimando alla sitemap. La guardia legge la stessa
   riga di configurazione e pretende l'una o l'altra cosa: è l'interruttore di
   `og:url` applicato all'indicizzazione.
 - **Ma `/admin` e `/componenti` non si vietano in `robots.txt`, e questo cambia
@@ -2384,10 +2385,10 @@ nessun `.env`, nessun token. Non c'è niente da riscrivere prima di pubblicare, 
   (`componenti.astro` per decisione della PR 6, `public/admin/index.html` per
   decisione della PR 14), ed è quello il meccanismo che funziona: vietarle in
   `robots.txt` lo spegnerebbe. Oggi non cambia niente, perché `Disallow: /` copre
-  tutto; cambia alla PR 21, che è il momento in cui il difetto si pubblicherebbe.
+  tutto; cambia alla PR 22, che è il momento in cui il difetto si pubblicherebbe.
   Quindi la guardia pretende **le due cose insieme**: il divieto generale
   concorde con `site`, e in nessuno dei due stati un `Disallow` su quelle due
-  pagine. La sitemap le esclude, che è l'altro modo giusto, e sta alla PR 21.
+  pagine. La sitemap le esclude, che è l'altro modo giusto, e sta alla PR 22.
 - **La CSP si genera dal pubblicato, non si scrive a mano.** Questo sito ha
   **cinque blocchi in linea** — lo script che toglie `no-js` in `Base.astro`,
   quello di `Modal.astro`, i due di `Programme.astro`, e lo `<style is:inline>`
@@ -2411,7 +2412,7 @@ nessun `.env`, nessun token. Non c'è niente da riscrivere prima di pubblicare, 
   quindi è anche il punto dove una CSP sbagliata rompe il CMS in silenzio, e la
   prova è un salvataggio vero, non un'occhiata al file.
 - **Niente HSTS qui.** `Strict-Transport-Security` è una promessa a scadenza
-  lunga fatta su un indirizzo che alla PR 21 verrà abbandonato. Arriva col
+  lunga fatta su un indirizzo che alla PR 22 verrà abbandonato. Arriva col
   dominio, insieme a tutto il resto che dipende da `site`.
 - **La 404 entra qui.** Un indirizzo sbagliato esiste dal primo giorno in cui il
   sito è in linea, non dal giorno del dominio — e su un sito dove il numero *è*
@@ -2446,7 +2447,7 @@ nessun `.env`, nessun token. Non c'è niente da riscrivere prima di pubblicare, 
 - **E la guardia sul sorgente chiede che la dichiarazione punti ancora a
   qualcosa, non che ogni foto sia dichiarata.** Scrivendola era «una foto in
   `src/assets/photos/` che nessuno ha marcato è una violazione», e sarebbe stata
-  una guardia che alla PR 21 segnala le fotografie vere dell'associazione — una
+  una guardia che alla PR 22 segnala le fotografie vere dell'associazione — una
   guardia che scatta su un lavoro giusto è la forma che qualcuno spegne, e
   spegnendola porterebbe via anche le due che servono. Quello che invece è
   invisibile è il caso opposto: un nome cambiato lascia `checkPlaceholderPhotos`
@@ -2480,7 +2481,7 @@ nessun `.env`, nessun token. Non c'è niente da riscrivere prima di pubblicare, 
   bypass al team `redazione`. Con un ruleset solo, dare il bypass al CMS gli
   regalerebbe anche il force push su `main`.
 
-  **Il bypass è a un team e non a un account**, perché alla PR 21 il CMS entra in
+  **Il bypass è a un team e non a un account**, perché alla PR 22 il CMS entra in
   OAuth e commetta con l'identità di chi ha fatto l'accesso: un account «della
   redazione» sarebbe una credenziale condivisa da ritirare fra tre passi. E **la
   protezione classica va cancellata**, non lasciata lì: classica e ruleset si
@@ -2506,12 +2507,12 @@ nessun `.env`, nessun token. Non c'è niente da riscrivere prima di pubblicare, 
   diventa vera il giorno che il redattore è un account suo dentro quel team, e
   quel giorno chi ha costruito il sito esce dal team.
 - **`site_url` nel `config.yml` del CMS resta commentato.** `pages.dev` è un
-  indirizzo che muore alla PR 21: puntarci il CMS vuol dire un collegamento «vedi
+  indirizzo che muore alla PR 22: puntarci il CMS vuol dire un collegamento «vedi
   il sito» che il giorno del dominio porta al posto sbagliato, e non fallisce da
   nessuna parte. È lo stesso ragionamento di `site`, applicato al file accanto.
 - **I tre «PR 15» in `public/admin/config.yml` puntano al passo sbagliato.** La
   PR 16 ha rinumerato cinquantacinque riferimenti e ha spazzato `src/`, `test/` e
-  `docs/`, non `public/`. Due parlano del dominio e dell'OAuth, che sono la PR 21;
+  `docs/`, non `public/`. Due parlano del dominio e dell'OAuth, che sono la PR 22;
   il terzo parla del deploy preview, che è **questa** e che diventa vera col
   merge. È lo stesso difetto che la PR 16 ha corretto altrove, sopravvissuto in
   una cartella che nessuno pensa a guardare perché non sembra codice.
@@ -2592,7 +2593,7 @@ nessun `.env`, nessun token. Non c'è niente da riscrivere prima di pubblicare, 
   l'asserzione che oggi in quella cartella non ce ne sono altre — e la metà
   anti-vacuità sulle pagine vere: con `site` acceso la guardia **deve** trovarne
   due, altrimenti quello che passa oggi passerebbe identico puntata sul nome
-  sbagliato. Si ritira da sé alla PR 21, quando l'elenco si svuota
+  sbagliato. Si ritira da sé alla PR 22, quando l'elenco si svuota
 - `checkInternalLinks` copre anche la 404, che è la pagina da cui è più facile
   scrivere un link a niente
 - **Guardia** sulle sorgenti che il bundle del CMS scarica da fuori: la policy
@@ -3052,7 +3053,7 @@ aperto mentre si scorre.
   leggibile su 3G, con caratteri, immagine e i 200 KB di markup che l'archivio
   pieno avrà
 
-Le anteprime sociali **restano alla PR 21**: senza dominio non c'è niente da
+Le anteprime sociali **restano alla PR 22**: senza dominio non c'è niente da
 incollare in una chat.
 
 ### Cosa entra in questa PR e cosa no
@@ -3239,7 +3240,121 @@ movimento attiva.
 
 ---
 
-## PR 21 — Il dominio
+## PR 21 — La rotaia che regge l'archivio
+
+**Branch:** `rotaia-archivio` · **Dipende da:** 20 — stesso file
+
+Un difetto **latente**: oggi non si vede, perché il sito ha sette serate.
+Arriva con l'archivio vero, e quando arriva è quello che la PR 11 esiste per
+aver chiuso.
+
+### La misura
+
+Con ottantuno serate simulate, su Firefox 154:
+
+| Finestra | Rotaia | Striscia | Tacche fuori dal bordo |
+|---|---|---|---|
+| 1280×800 | 708 px | 696 px | 0 — passa per dodici pixel |
+| 1280×650 | 558 px | 696 px | **22** |
+| 1280×460 | 368 px | 696 px | **54** |
+
+Fuori dal bordo vuol dire **ritagliate**: la rotaia dichiara `overflow: hidden` e
+sul desktop non scorre, quindi quelle tacche restano nel markup, invisibili e
+non cliccabili. Raggiungibili solo col Tab, che non è «un tocco».
+
+La causa sta in due righe che si tenevano a vicenda: la rotaia era una griglia
+con `align-content: center`, e una riga di griglia si dimensiona sul contenuto —
+quindi **niente costringeva la striscia**; e il passo delle tacche lontane era
+scritto come `padding`, che non si stringe. La striscia poteva solo crescere, e
+oltre il bordo veniva tagliata.
+
+### Il rimedio
+
+La rotaia diventa una colonna flex con un'altezza definita, la striscia dichiara
+`max-height: 100%` — che sotto la griglia non si sarebbe risolto contro niente —
+e il passo delle tacche lontane diventa una base flex restringibile,
+`flex: 0 1 6px`. Sono gli stessi sei pixel di prima, ed è ancora **la scatola**,
+quindi prende ancora il clic: è quello che la PR 11 aveva ottenuto spostando il
+passo da margine a padding. Quel che cambia è l'`1` in mezzo — quando l'archivio
+non ci sta, le tacche cedono invece di sfondare.
+
+**Cedono e non crescono.** Con venti e con quaranta serate lo spazio c'è e il
+passo resta esattamente sei, misurato. A ottantuno su una finestra da 650 px
+diventa 3,4 px: un bersaglio più piccolo di sei, al posto di ventidue tacche che
+non erano bersagli affatto.
+
+### La seconda leva, e perché non è stata spedita
+
+Il piano approvato prevedeva anche una **consegna alla barra** sotto una soglia
+d'altezza, con la soglia calcolata dalla build. Non è stata fatta, per due
+ragioni trovate scrivendola.
+
+**La prima è meccanica.** Astro dà uno scope agli stili di un componente, e in
+una condizione di media query non si può interpolare un numero della build:
+`define:vars` passa proprietà personalizzate, che in una `@media` non si leggono.
+Emettere il blocco intero fuori dallo scope — come fa `CycleAccents` — vorrebbe
+dire riscrivere lì tutte le regole della barra, che esistono già, e con una
+specificità che deve battere quella con l'attributo di scope. Due copie della
+stessa forma, che è il guasto che questo repository passa il tempo a cacciare.
+Resterebbe una soglia scritta a mano: **giusta il giorno che si scrive e
+sbagliata l'anno dopo**, perché l'archivio cresce di ~52 serate l'anno.
+
+**La seconda è di merito, e pesa di più.** La barra costa spazio **in basso**, ed
+è esattamente dove lo spazio manca: a 1280×500 il collaudo ha già registrato che
+il contenuto della scena esce dal bordo inferiore — QA-150. La rotaia costa
+spazio a destra, dove ce n'è. Consegnare alla barra su una finestra bassa
+peggiora un difetto già scritto per rimediarne un altro.
+
+**Quel che resta è dichiarato, non nascosto.** Sotto i ~470 px di rotaia con
+ottantuno serate il passo scende sotto i quattro pixel — a 368 px misura 0,63 —
+e i marchi si leggono come una linea: l'archivio è tutto presente e nessuna
+tacca è tagliata, ma mirare a una serata precisa diventa approssimativo.
+Stringere la finestra etichettata non basta e la misura lo dice: ±3 dà 1,93 px,
+±2 ne dà 2,52. L'aritmetica è secca — 70 marchi a 4 px sono 280 px, più 89 della
+finestra più stretta fanno 369, cioè la rotaia intera. **Non è una taratura che
+manca: è che a quell'altezza non ci sta.** Sta in
+[questioni-aperte.md](questioni-aperte.md), da riguardare con l'archivio vero
+davanti.
+
+### La rinumerazione
+
+Questo passo si infila prima del dominio, che diventa **PR 22**. Nel piano e nei
+documenti i numeri restano; nei **commenti di codice e di test** il numero
+sparisce e resta il nome — «the domain step», «when the domain arrives» — perché
+un numero dentro un commento è la copia che si disallinea al primo passo
+inserito, e sono 69 riferimenti in 19 file. Le tre citazioni di una frase
+sbagliata in passato restano come stanno: correggere un verbale è falsificarlo.
+
+### Obiettivi
+
+- [x] Con 81 serate simulate, nessuna tacca fuori dal bordo a 800, 650 e 460 px
+      di finestra — misurato, non guardato
+- [x] A 20 e 40 serate non cambia niente: stesso passo, stessa rotaia
+- [x] La barra del telefono non cambia forma: la rotaia passa da griglia a flex e
+      la barra resta quella
+- [ ] Con l'archivio vero, il limite dichiarato qui sopra si guarda con gli occhi
+
+### Test automatici
+
+- **Guardia**: `checkRailHoldsTheArchive`, sul CSS pubblicato — la striscia è
+  vincolata dalla rotaia e le tacche lontane possono cedere. Legge il
+  meccanismo e non l'esito, perché quanto viene alta una scatola non sta nel
+  testo di un foglio di stile, e il commento lo dice
+- Le asserzioni esistenti su `dist/` restano: una tacca per serata, la finestra
+  etichettata, e la barra come seconda scatola scorrevole nominata
+- La suite intera e `npm run test:mutate`
+
+### Test manuali
+
+Il difetto non si vede su questo sito: ci sono sette serate. Si misura clonando
+le tacche a 81 nel browser e contando quante cadono fuori dal bordo — è la
+procedura con cui sono presi i numeri qui sopra, scritta qui perché sia
+ripetibile invece che rifatta a memoria. Più le righe della matrice a tre altezze
+di finestra, e il giro sul telefono per accertarsi che la barra sia intatta.
+
+---
+
+## PR 22 — Il dominio
 
 **Branch:** `dominio` · **Dipende da:** 17, 19 — e dal committente
 

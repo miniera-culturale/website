@@ -305,7 +305,7 @@ describe('every published page', () => {
       // a guard pointed at the wrong stem would satisfy them in exactly the
       // same way. This is what tells the two apart.
       //
-      // It retires itself: PR 21 replaces the photographs and empties the list,
+      // It retires itself: the real photographs replace these and empty the list,
       // and with an empty list there is nothing to be non-vacuous about.
       const found = pages.flatMap((page) =>
         checkPlaceholderPhotos(page.html, PLACEHOLDER_PHOTOS, { withDomain: true }, page.path),
