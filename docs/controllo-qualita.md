@@ -205,3 +205,20 @@ la barra di scorrimento del programma arriva chiara su un sito blu notte.
 
 Le anteprime sociali **restano alla PR 21**: senza dominio non c'è niente da
 incollare in una chat.
+
+## Le righe riaperte dalla PR 20
+
+La PR 20 cambia il comportamento che una parte di questa matrice aveva
+verificato, quindi quelle righe tornano da fare invece di restare `OK` su una
+cosa che non esiste più: il tocco su una tacca adesso **muove** la pagina, e la
+barra si muove con lei. Sono QA-017, QA-041, QA-054, QA-064, QA-098, QA-099,
+QA-115, QA-116, QA-132, QA-170, QA-171 e QA-309 — di cui sei erano `OK` — e ne
+arrivano dodici nuove, da QA-339 a QA-350: il centraggio della prima e
+dell'ultima serata, il movimento della barra, la pressione del dito, il lettore
+che riprende lo scorrimento mentre un salto è in volo, e una serata aperta in
+una scheda di sfondo.
+
+L'osservazione della corsa precedente resta scritta dov'era. QA-099 in
+particolare porta ancora la sua — *«Manca l'animazione dello scorrimento»* — ed
+è il reclamo da cui nasce la PR 20: cancellarla per riaprire la riga avrebbe
+tolto la traccia proprio dal posto in cui qualcuno la cercherebbe.

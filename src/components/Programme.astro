@@ -96,8 +96,26 @@ const { scenes, openIndex } = Astro.props;
       }
       if (asked && document.getElementById(asked)) return;
 
+      /* Instant, and from PR 20 it has to say so.
+         An assignment to `scrollTop` is not a jump: the setter scrolls with the
+         behavior «auto», and «auto» means *the computed value of
+         `scroll-behavior`* — so once the scroller declares `smooth`, this line
+         animates too. Measured at PR 20 in Firefox 154 and in Chromium 148, and
+         the way it fails is silent: a smooth scroll does not advance in a hidden
+         tab, so `/85` opened in a background tab — a Ctrl+click, an
+         open-in-new-tab — arrives at the top of the archive, and the reader
+         finds it there when they switch to it.
+
+         So the property is set aside for this one scroll and put straight back.
+         Not `behavior: 'instant'`: `behavior` is a WebIDL enum, and a value an
+         engine does not know throws a TypeError rather than falling back to the
+         property — thrown from here it would take the opening jump with it, on
+         exactly the oldest engines this project still supports. */
+      var behaviour = scroller.style.scrollBehavior;
+      scroller.style.scrollBehavior = 'auto';
       scroller.scrollTop +=
         open.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+      scroller.style.scrollBehavior = behaviour;
     })();
   </script>
 
@@ -142,24 +160,28 @@ const { scenes, openIndex } = Astro.props;
         if (ticks[i].getAttribute('aria-current')) current = i;
       }
 
-      /* There is no smooth scrolling here, and that is a decision rather than
-         an omission — see CLAUDE.md rule 15.
+      /* The jumps are animated again from PR 20, and the animation is a
+         **property** — never an argument. CLAUDE.md rule 15.
 
-         `scroll-behavior` reaches only the scrolls a script asks for, and every
-         one of those here is a jump to an evening. Animated, a jump can be
-         interrupted: a second one issued while the first is in flight is
-         dropped by the engine, and the programme stays on the first
-         destination while the rail, the accent and the address all name the
-         second. Two ticks tapped two tenths of a second apart is enough, and
-         what it leaves behind is a site that contradicts itself with nothing
-         to see. Found at PR 9 and fixed there; PR 8 had shipped it, and had
-         written the symptom off as a bad measurement.
+         It was taken away at PR 9 and for a measured reason: a jump the engine
+         animates can be interrupted, and a second one issued while the first is
+         in flight was dropped, leaving the programme on the first destination
+         while the rail, the accent and the address all named the second. It
+         came back because the client, on a phone, said that pressing a tick
+         produces no movement at all — the site looks as if it had not answered.
 
-         So the property is not declared and the jumps land at once. Which also
-         answers `prefers-reduced-motion` by construction instead of by a rule
-         that has to keep winning, and is why `scrollIntoView()` below is still
-         called with no argument at all: `behavior: 'smooth'` passed by hand
-         would put the animation back where no stylesheet could reach it. */
+         What answers the old measurement is not a promise that engines have
+         improved. It is `settle()` below: when the scrolling stops, the landing
+         is compared with the destination and put right if they differ. The
+         defect no longer has to be prevented, which is what could only be done
+         by refusing to move.
+
+         `scrollIntoView()` is still called with no argument at all, and that is
+         the half that has not changed: `behavior: 'smooth'` passed by hand beats
+         the `scroll-behavior: auto !important` global.css sets under
+         `prefers-reduced-motion`, so a reader who asked for less movement would
+         get the full animation anyway, with nothing to see in dist/. Declared as
+         a property, the one setting those readers have keeps working. */
 
       /* The bar on a phone scrolls sideways through every evening there is, so
          the current pill has to be brought into sight as the reader moves. The
@@ -171,14 +193,37 @@ const { scenes, openIndex } = Astro.props;
          elements where they are gets the same answer as arithmetic over widths
          and paddings, and goes on getting it when a pill changes size.
 
-         `scrollLeft` and not `scrollIntoView()`, which walks up every scrollable
-         ancestor and would move the programme itself to show a tick. */
-      function reveal(index) {
+         `scrollTo` and not `scrollIntoView()`, which walks up every scrollable
+         ancestor and would move the programme itself to show a tick. And with
+         no `behavior`, so that the bar's own `scroll-behavior: smooth` decides:
+         until PR 20 this was `scrollLeft +=`, which looks instant and is not —
+         it scrolls with the behavior «auto», which is the computed value of the
+         property. What the bar was missing was never the call, it was the
+         property. The call changed anyway, because a form that reads as instant
+         while doing whatever a stylesheet says is the sentence that misled the
+         plan of this very PR.
+
+         `instantly` for exactly one caller, the first one: putting the bar
+         where the build could not is not a movement to be shown, and animated
+         it would be half a second of rail sliding at every page load, saying
+         nothing. The property is set aside for that one scroll — not
+         `behavior: 'instant'`, which throws where an engine does not know it. */
+      function reveal(index, instantly) {
         if (timeline.scrollWidth <= timeline.clientWidth) return;
 
         var bar = timeline.getBoundingClientRect();
         var tick = ticks[index].getBoundingClientRect();
-        timeline.scrollLeft += tick.left - bar.left - (bar.width - tick.width) / 2;
+        var left = timeline.scrollLeft + tick.left - bar.left - (bar.width - tick.width) / 2;
+
+        if (!instantly) {
+          timeline.scrollTo({ left: left });
+          return;
+        }
+
+        var behaviour = timeline.style.scrollBehavior;
+        timeline.style.scrollBehavior = 'auto';
+        timeline.scrollTo({ left: left });
+        timeline.style.scrollBehavior = behaviour;
       }
 
       /* The window of ticks around `centre`, put on or taken off. The value is
@@ -268,16 +313,14 @@ const { scenes, openIndex } = Astro.props;
         }
       }
 
-      /* The design's guard, kept for the case this project cannot yet test.
-         A jump that the engine animates crosses every evening in between, and
-         the observer would report each one: the rail flickering through forty
-         dates and the site through forty colours before settling. Nothing here
-         animates any more — the jumps land at once — but a fragment jump is the
-         browser's, not ours, and Safari is the browser whose behaviour we do not
-         get to see until the site is published (docs/questioni-aperte.md). So a
-         jump still names its destination, and until that destination arrives —
-         or 1200 ms pass, because an animation interrupted by snap may never
-         arrive — what the observer reports is not news. */
+      /* The design's guard, and from PR 20 it guards something that happens on
+         every jump instead of only in a browser we cannot watch.
+         A jump the engine animates crosses every evening in between, and the
+         observer reports each one: the rail flickering through forty dates and
+         the site through forty colours before settling. So a jump names its
+         destination, and until that destination arrives — or the scrolling
+         stops, or 1200 ms pass, because an animation interrupted by snap may
+         never arrive at all — what the observer reports is not news. */
       var target = null;
       var timer;
 
@@ -296,6 +339,76 @@ const { scenes, openIndex } = Astro.props;
         }, 1200);
         setCurrent(index);
       }
+
+      /* Where a jump ended up, which from PR 20 is not the same question as
+         where it was sent.
+         An animated jump can be interrupted, and an interrupted one may be
+         dropped: PR 9 measured two ticks tapped two tenths of a second apart
+         leaving the programme on the first destination while the rail, the
+         accent and the address named the second. Nothing here promises that no
+         longer happens — on Firefox 154 it does not, at any human interval, and
+         Safari is the engine we do not get to see until the site is published
+         (docs/questioni-aperte.md). What this does is make it not matter: when
+         the scrolling stops, the landing is compared with the destination and
+         put right if they differ.
+
+         Instant, and it says so with the property set aside: a correction that
+         animated would be a second jump, interruptible in its turn.
+
+         Two deadlines and not one. A jump that moves keeps pushing the short
+         one out with its own scroll events, so the check runs once the movement
+         has stopped — the snap's own last adjustment included. A jump that
+         never moves at all fires nothing, and the long one is what catches it:
+         without it a dropped jump would sit armed until the reader's next
+         flick, and *that* would pull them to an evening they had stopped
+         asking for. */
+      var landing = null;
+      var settling;
+
+      function watch(index) {
+        landing = index;
+        clearTimeout(settling);
+        settling = setTimeout(settle, 800);
+      }
+
+      /* A reader who has taken the scrolling back into their own hands is not
+         still travelling to where a jump was going. */
+      function abandon() {
+        landing = null;
+      }
+
+      function settle() {
+        /* The movement is over, whatever it did, so the observer speaks again.
+           This is the clause that lets the mute above outlast a long animation
+           without having to guess how long one is. */
+        target = null;
+        clearTimeout(timer);
+
+        var index = landing;
+        landing = null;
+        if (index === null) return;
+
+        var delta =
+          scenes[index].getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+        if (Math.abs(delta) < 1) return; // arrived, which is the ordinary case
+
+        var behaviour = scroller.style.scrollBehavior;
+        scroller.style.scrollBehavior = 'auto';
+        scroller.scrollTop += delta;
+        scroller.style.scrollBehavior = behaviour;
+      }
+
+      scroller.addEventListener(
+        'scroll',
+        function () {
+          clearTimeout(settling);
+          settling = setTimeout(settle, 140);
+        },
+        { passive: true },
+      );
+
+      scroller.addEventListener('pointerdown', abandon, { passive: true });
+      scroller.addEventListener('wheel', abandon, { passive: true });
 
       var observer = new IntersectionObserver(
         function (entries) {
@@ -323,12 +436,12 @@ const { scenes, openIndex } = Astro.props;
 
       for (var s = 0; s < scenes.length; s++) observer.observe(scenes[s]);
 
-      /* Where the build could not put it: `scrollLeft` is not something a
+      /* Where the build could not put it: a scroll position is not something a
          stylesheet sets, so the bar arrives showing the oldest evening while
          `aria-current` sits on one out of sight. This is the first thing that
          puts it right, and with no scripting it is what a reader is left with —
          declared in docs/piano.md rather than papered over. */
-      reveal(current);
+      reveal(current, true);
 
       // The jump itself is the browser's: this only says where it is going, so
       // that the rail does not read the forty evenings it passes over.
@@ -361,11 +474,15 @@ const { scenes, openIndex } = Astro.props;
            anchor, and preventing those would be taking it back.
 
            `scrollIntoView()` with no argument at all, rule 15: the how is left
-           to `scroll-behavior`, which is what makes this instant for everybody
-           and correct for whoever asked for reduced motion. */
+           to `scroll-behavior`, which is what animates this for everybody and
+           leaves it instant for whoever asked for reduced motion. And `watch()`
+           after it, because from PR 20 the jump moves and a moving jump can be
+           interrupted: what makes that survivable is checking where it landed,
+           not hoping it lands. */
         event.preventDefault();
         aim(index);
         scenes[index].scrollIntoView();
+        watch(index);
 
         /* And the focus, which the browser would have moved itself: following
            an anchor sets the point the next Tab starts from, and preventing
@@ -425,6 +542,7 @@ const { scenes, openIndex } = Astro.props;
           if (next < 0 || next >= scenes.length) return;
           aim(next);
           scenes[next].scrollIntoView();
+          watch(next);
         },
         { passive: false },
       );
@@ -444,6 +562,11 @@ const { scenes, openIndex } = Astro.props;
         // selects, and taking them over answers a request nobody made.
         if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
 
+        /* Every other key that scrolls is the browser's — Space, Tab onto
+           something below the fold — and it is the reader scrolling, so a jump
+           still in flight stops being theirs. */
+        abandon();
+
         var index = null;
         if (event.key === 'Home') index = 0;
         else if (event.key === 'End') index = scenes.length - 1;
@@ -455,6 +578,7 @@ const { scenes, openIndex } = Astro.props;
         event.preventDefault();
         aim(index);
         scenes[index].scrollIntoView();
+        watch(index);
       });
     })();
   </script>
@@ -470,6 +594,17 @@ const { scenes, openIndex } = Astro.props;
     height: var(--scene-height);
     overflow-y: auto;
     scroll-snap-type: y mandatory;
+
+    /* The jumps move, from PR 20, and they move because of this line and not
+       because of an argument somewhere in the script — rule 15. Declared here,
+       `prefers-reduced-motion` can take it away, and global.css does, with
+       `scroll-behavior: auto !important`.
+
+       It reaches more than the three `scrollIntoView()` calls: every scroll a
+       script asks for on this box, an assignment to `scrollTop` included. The
+       two that must stay instant — the opening jump and the landing check — set
+       this aside for themselves, and say why. */
+    scroll-behavior: smooth;
 
     /* Hidden, as in the design: the Timeline of PR 8 is what tells a reader
        where they are, and a scrollbar over 81 evenings says almost nothing. */

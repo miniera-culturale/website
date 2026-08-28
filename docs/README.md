@@ -104,6 +104,15 @@ Fatto:
   CSP i cui hash si calcolano da `dist/` invece di essere scritti a mano. Il
   repository è pubblico, in un'organizzazione, e `main` sta su due ruleset —
   quello che dà il bypass al CMS non dà il force push
+- **La barra del tempo sta al centro e si muove.** La serata a schermo arriva al
+  centro della barra a ogni posizione dell'archivio, prima e ultima comprese — la
+  striscia ha mezza barra di spazio ai due capi, che è quello che le mancava — e
+  il salto a una serata è tornato animato: `scroll-behavior` come proprietà, così
+  chi ha chiesto meno movimento se lo riprende. Quello che la PR 9 aveva misurato
+  non si evita più, si corregge: a scorrimento fermo si controlla dove si è
+  atterrati. Riprodurre quel difetto ne ha trovato un altro che sarebbe stato
+  spedito — una serata aperta in una scheda di sfondo si apriva in cima
+  all'archivio, perché uno scorrimento animato non avanza in una scheda nascosta
 - **La misura del testo si scrive in `rem`**: i `clamp()` delle scene avevano i
   limiti in px, copiati dal design, e chi ingrandisce il testo dal sistema non
   otteneva niente. È la regola 23, con la sua guardia sui due strati, e il
