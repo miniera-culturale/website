@@ -1187,31 +1187,29 @@ quello i numeri onesti sono lo 0,2% di chi li disattiva e circa l'1% di chi non
 li riceve — ma perché **costa meno del bottone**: che funzioni senza script è
 quel che la scelta più economica regala. *(PR 8)*
 
-**Lo scroller non anima i salti.** `scroll-behavior: smooth` c'è stato dalla
-PR 8 alla PR 9 ed è stato tolto, perché un salto animato è interrompibile: un
-secondo salto partito mentre il primo è in volo il motore lo lascia cadere, e il
-programma resta sulla prima destinazione mentre rotaia, accento e indirizzo
-dicono la seconda. Due tacche toccate a due decimi di distanza bastano — e la
-PR 8 l'aveva visto, in una forma indistinguibile da un errore di misura, e
-l'aveva archiviato come tale.
+**Lo scroller non anima i salti — poi li anima di nuovo.** `scroll-behavior:
+smooth` c'è stato dalla PR 8 alla PR 9 ed è stato tolto, perché un salto animato
+è interrompibile: un secondo salto partito mentre il primo è in volo il motore lo
+lasciava cadere, e il programma restava sulla prima destinazione mentre rotaia,
+accento e indirizzo dicevano la seconda. Due tacche toccate a due decimi di
+distanza bastavano — e la PR 8 l'aveva visto, in una forma indistinguibile da un
+errore di misura, e l'aveva archiviato come tale.
 
-Non è una rinuncia scambiata con la correttezza. `scroll-behavior` raggiunge
-**solo** gli scorrimenti chiesti da uno script, e qui sono tutti salti a una
-serata: tutto ciò che quella proprietà comprava era rendere interrompibile
-l'unica cosa che quei salti devono fare. In cambio `prefers-reduced-motion` è
-soddisfatto per costruzione invece che da una regola che deve continuare a
-vincere, e sparisce la macchinetta che accendeva la proprietà sull'evento
-`load`. *(PR 8, tolto in PR 9)*
+È tornato alla PR 20, e la ragione nuova è il giudizio del committente su una
+cosa che ha guardato: sul suo telefono, premere una tacca non produce nessun
+movimento e il sito sembra non aver risposto. Quello che rende innocua la misura
+della PR 9 non è una promessa sui motori — è la verifica dell'atterraggio, qui
+sotto. *(PR 8, tolto in PR 9, rimesso in PR 20)*
 
-**E se l'animazione tornasse, tornerebbe come proprietà — mai come argomento.**
-Un `{ behavior: 'smooth' }` passato a una chiamata batte il
+**E l'animazione è tornata come proprietà, mai come argomento.** Un
+`{ behavior: 'smooth' }` passato a una chiamata batte il
 `scroll-behavior: auto !important` che `global.css` mette sotto
 `prefers-reduced-motion`: l'argomento vince sulla proprietà, per specifica e in
-ogni motore. Sarebbe un guasto invisibile in `dist/`, che non fa fallire niente
-e colpisce esattamente le persone per cui l'impostazione esiste. La guardia
-resta, e adesso conta di più: rimettere l'animazione così è la prima cosa che
-verrà in mente a qualcuno. Ogni salto continua a chiamare `scrollIntoView()`
-senza argomenti. *(PR 8)*
+ogni motore. Sarebbe un guasto invisibile in `dist/`, che non fa fallire niente e
+colpisce esattamente le persone per cui l'impostazione esiste. La guardia resta,
+e dalla PR 20 sorveglia qualcosa di vivo invece di qualcosa di spento: ogni salto
+continua a chiamare `scrollIntoView()` senza argomenti, e adesso quella chiamata
+si muove. *(PR 8, e ancora vero in PR 20)*
 
 **L'accento globale sta su `<html>`.** È il giorno che il commento di
 `:where(:root)` in `colors.css` aveva previsto: scritto `:root`, quella regola
@@ -2062,6 +2060,91 @@ sotto la metà. Due leve insieme — 72% di altezza e il centro spostato di uno
 spazio verso sinistra, dentro il gap della colonna dove il posto c'è — la
 riportano tutta dentro senza toccare né la forma né l'inclinazione, che sono del
 marchio.
+
+## La barra che sta al centro, e si muove
+
+**La serata corrente non poteva stare al centro, e il motivo era aritmetico.**
+`reveal()` faceva il calcolo giusto — la tacca al centro della barra — e il
+browser lo troncava, perché oltre il bordo non c'è niente su cui scorrere: la
+striscia comincia con la prima tacca e finisce con l'ultima. Misurato
+sull'anteprima della PR 19 a 390 px: la terza serata a −6 px dal centro, la
+quinta a +17, **la prima a −184 e l'ultima a +188**. Con l'archivio pieno il
+difetto non sparisce, si sposta: le serate nel mezzo si centrano e gli estremi
+no — e la serata su cui il sito si apre è la prossima futura, cioè quasi sempre
+l'ultima. Il caso che sbagliava era il caso normale. *(PR 20)*
+
+**Lo spazio si scrive come mezza barra vera, non come `50%`.** Il rimedio è dare
+alla striscia metà barra di vuoto per lato, e la prima scrittura è stata
+`padding-inline: 50%` — che a schermo faceva esattamente la cosa giusta. Su una
+scatola `width: max-content` però la percentuale si risolve **sul contenuto della
+scatola**, non sulla barra: misurato su Firefox 154, triplicando le tacche il
+padding triplicava. Con sette serate erano 302 px per lato e sembrava giusto; con
+ottantuno sarebbero stati circa 3500, e la barra avrebbe scorso dentro migliaia
+di pixel di niente. La barra è il viewport meno i suoi due margini, quindi metà
+barra è `calc(50vw - var(--space-3))`, che dice la stessa cosa a ogni lunghezza
+d'archivio. Il prezzo, visibile e accettato: con l'ultima serata al centro, metà
+barra è vuota. *(PR 20)*
+
+**Alla barra mancava la proprietà, non la chiamata.** Il piano diceva che
+`reveal()` non si muoveva perché scriveva `scrollLeft +=`, «istantaneo per
+specifica qualunque cosa dica il foglio di stile». È falso, e la misura è qui
+sotto: alla barra non era mai stato dichiarato `scroll-behavior`. La chiamata è
+diventata `scrollTo({ left })` lo stesso, perché una forma che si legge come
+istantanea mentre fa quello che dice un foglio di stile è la frase che ha
+ingannato chi ha scritto il piano. *(PR 20)*
+
+**Un'assegnazione diretta non è un salto.** Per CSSOM-View il setter di
+`scrollTop`/`scrollLeft` scorre con il behavior «auto», e «auto» vuol dire *il
+valore calcolato di `scroll-behavior`*. Misurato alla PR 20 su Firefox 154 —
+`scroller.scrollTop += 2866` dà 0 subito, 427 dopo 60 ms, 2695 dopo 300 ms — e su
+Chromium 148. Era scritto il contrario in `docs/piano.md`, ed è stato ripetuto
+nel piano della PR 20 prima che qualcuno lo provasse.
+
+E la cosa era **già nota**: la sezione della PR 8, nello stesso file, dice
+«assegnare `scrollTop` obbedisce alla proprietà, quindi acceso prima avrebbe
+fatto scendere l'apertura in animazione da cima all'archivio». Fra la PR 9, che
+ha tolto la proprietà, e la PR 20, che l'ha rimessa, quel fatto è rimasto scritto
+in un paragrafo che non riguardava più niente — e la frase falsa è stata scritta
+dodici passi dopo nello stesso documento. Un fatto sopravvive dove sta la regola
+che lo usa: per questo sta nella regola 15 e non solo qui. *(PR 20)*
+
+**E da lì veniva un difetto vero: `/85` in una scheda di sfondo apriva la serata
+78.** Uno scorrimento animato non avanza in una scheda nascosta, e con la
+proprietà dichiarata il salto d'apertura diventava uno scorrimento animato: chi
+apre una serata con un Ctrl+clic tornava sulla scheda e trovava la cima
+dell'archivio. Riprodotto durante la PR 20 e chiuso mettendo da parte la
+proprietà per quel solo scorrimento. Non con `behavior: 'instant'`: `behavior` è
+un enum WebIDL, quindi un valore che il motore non conosce **lancia** invece di
+ricadere sulla proprietà, e lanciato dal salto d'apertura si porta via il salto —
+sui motori più vecchi che il progetto dichiara di sostenere, che sono esattamente
+quelli per cui il ripiego servirebbe. *(PR 20)*
+
+**La verifica dell'atterraggio, invece di una promessa sui motori.** A
+scorrimento fermo si confronta la posizione della destinazione con quella dello
+scroller e, se non combaciano, si corregge d'istante. Il difetto della PR 9 non
+si evita più — evitarlo si poteva solo rinunciando a muoversi — si corregge.
+Due scadenze e non una: un salto che si muove spinge in avanti quella corta con i
+propri eventi di scorrimento, e un salto che non si muove affatto non ne emette
+nessuno, quindi serve anche quella lunga: senza, un salto lasciato cadere
+resterebbe armato fino alla prossima passata di dito del lettore, e *quella* lo
+strattonerebbe su una serata che aveva smesso di chiedere. Chi riprende in mano
+lo scorrimento — un dito, una rotella, un tasto — disarma la verifica. *(PR 20)*
+
+**Il difetto della PR 9 non si riproduce più su Firefox 154.** Due tacche lontane
+a 40, 60, 80, 100 e 200 ms di distanza: il secondo salto ridirige sempre, e alla
+fine pagina, `aria-current`, indirizzo, titolo e accento dicono la stessa serata.
+Solo a 30 ms il secondo tocco è stato lasciato cadere. Su Chrome non si è potuto
+misurare — la scheda del pannello di anteprima è nascosta, e lì nessuno
+scorrimento animato avanza — e Safari resta il motore che non si vede finché il
+sito non è pubblicato. La verifica dell'atterraggio resta per quello: è
+un'assicurazione, e va chiamata così. *(PR 20)*
+
+**La pressione della tacca cede invece di abbassarsi.** `transform: scale(0.94)`
+su `:active`, che è l'unico stato che questo design system possiede. Non il
+`translateY(2px)` di `Button`, `Modal` e i materiali di una scena: in una riga di
+pillole affiancate una tacca che scende si legge come uno scivolamento, mentre
+una pillola che cede sotto il dito si legge come una pressione. Sul telefono è
+l'unica risposta che il dito riceve prima che la pagina si muova. *(PR 20)*
 
 ## La rotaia che regge l'archivio
 

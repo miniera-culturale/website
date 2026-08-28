@@ -16,6 +16,7 @@ import {
   checkUndefinedCustomProperties,
 } from '../guards/css.ts';
 import { checkDisplayFontWeightRange } from '../guards/fonts.ts';
+import { checkCentringSpace } from '../guards/scroller.ts';
 import { checkItalianCustomProperties } from '../guards/language.ts';
 import { readPublishedCss } from '../support/dist.ts';
 
@@ -80,6 +81,25 @@ describe('the CSS that actually ships', () => {
     // scroller happened to be. The stylesheet arrives through an import nothing
     // else refers to, which is exactly the kind of thing a bundler drops.
     expect(checkPrintStyles(css, 'dist/')).toEqual([]);
+  });
+
+  it('leaves the sideways bar room to bring an evening to the middle', () => {
+    // A length, which is the thing a minifier rewrites, and half a viewport
+    // written as a `calc()` is what it likes least. Without it `reveal()`
+    // computes the right position and the browser truncates it: the first and
+    // the last evening cannot reach the centre, and the one this site opens on
+    // is the next still to come — almost always the last.
+    expect(checkCentringSpace(css, 'dist/')).toEqual([]);
+  });
+
+  it('declares the movement of the jumps as a property, where a reader can refuse it', () => {
+    // Rule 15 as it stands from PR 20: the animation is a property so that the
+    // `scroll-behavior: auto !important` global.css sets under
+    // prefers-reduced-motion can take it away. Both halves are read here
+    // because both live in dist/ and neither fails anywhere else.
+    expect(css).toMatch(/\.scroller[^{}]*\{[^}]*scroll-behavior:\s*smooth/);
+    expect(css).toMatch(/prefers-reduced-motion/);
+    expect(css).toMatch(/scroll-behavior:\s*auto\s*!important/);
   });
 
   it("keeps the Timeline tick as big as the site's own touch target", () => {

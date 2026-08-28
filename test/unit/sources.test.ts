@@ -59,7 +59,7 @@ import {
 import { checkDevDepsInLockfile, checkNoTailwind } from '../guards/packages.ts';
 import { checkNoClientDirectives, checkNoUiFramework } from '../guards/react.ts';
 import { checkHistoryPush } from '../guards/routes.ts';
-import { checkSmoothScrollArgument } from '../guards/scroller.ts';
+import { checkBareScrollWrite, checkSmoothScrollArgument } from '../guards/scroller.ts';
 import { checkHandWrittenShapes } from '../guards/shapes.ts';
 import { collectionEntries, dateOf, slugifySegment } from '../support/frontmatter.ts';
 import {
@@ -303,6 +303,17 @@ describe('the code that handles dates', () => {
     // control a reader prone to motion sickness has stops working, with nothing
     // to see in dist/ and nothing failing.
     expect(checkSmoothScrollArgument(read(path), path).map((v) => v.detail)).toEqual([]);
+  });
+
+  it.each(codeFiles)('%s says which of its scrolls are instant', (path) => {
+    // The other half, and the one PR 20 measured: a write straight to
+    // `scrollTop` is not the jump it reads as. The setter scrolls with the
+    // behavior "auto", which is the computed value of `scroll-behavior`, so
+    // under the `smooth` the scroller declares it animates like everything
+    // else — and a smooth scroll does not advance in a hidden tab, so the
+    // opening jump written that way sent `/85` opened in a background tab to
+    // the top of the archive.
+    expect(checkBareScrollWrite(read(path), path).map((v) => v.detail)).toEqual([]);
   });
 
   it.each(codeFiles)('%s replaces the address instead of pushing it', (path) => {

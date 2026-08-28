@@ -7,6 +7,8 @@
  */
 import { describe, expect, it } from 'vitest';
 import {
+  checkBareScrollWrite,
+  checkCentringSpace,
   checkSingleScroller,
   checkSmoothScrollArgument,
   scrollableRules,
@@ -165,5 +167,147 @@ describe('checkSmoothScrollArgument', () => {
 
   it('says nothing about a file that scrolls nothing', () => {
     expect(checkSmoothScrollArgument(`const a = 1;`, 'a.ts')).toEqual([]);
+  });
+});
+
+/* The write that reads as a jump and is not one.
+ *
+ * This is the defect PR 20 measured rather than reasoned about: with
+ * `scroll-behavior: smooth` declared on the scroller, `scroller.scrollTop += …`
+ * animates — the setter scrolls with the behavior «auto», which is the computed
+ * value of the property. The opening jump is written that way, and a smooth
+ * scroll does not advance in a hidden tab: `/85` opened in a background tab
+ * arrived at the top of the archive.
+ */
+describe('checkBareScrollWrite', () => {
+  it('reports a scroll position written straight', () => {
+    const violations = checkBareScrollWrite('scroller.scrollTop += delta;', 'a.astro');
+    expect(violations).toHaveLength(1);
+    expect(violations[0]!.detail).toContain('scrollTop');
+    expect(violations[0]!.detail).toContain('a.astro');
+
+    expect(checkBareScrollWrite('timeline.scrollLeft = left;', 'a.astro')).toHaveLength(1);
+    expect(checkBareScrollWrite('timeline.scrollLeft -= 10;', 'a.astro')).toHaveLength(1);
+  });
+
+  it('accepts the call that leaves the how to the stylesheet', () => {
+    expect(checkBareScrollWrite('timeline.scrollTo({ left: left });', 'a.astro')).toEqual([]);
+    expect(checkBareScrollWrite('scenes[index].scrollIntoView();', 'a.astro')).toEqual([]);
+  });
+
+  it('accepts a write with the property set aside for it', () => {
+    const declared = [
+      "var behaviour = scroller.style.scrollBehavior;",
+      "scroller.style.scrollBehavior = 'auto';",
+      'scroller.scrollTop += delta;',
+      'scroller.style.scrollBehavior = behaviour;',
+    ].join('\n');
+    expect(checkBareScrollWrite(declared, 'a.astro')).toEqual([]);
+  });
+
+  it('does not let one element borrow the set-aside of another', () => {
+    // The set-aside is on the bar and the write is on the programme: the
+    // programme still animates, and the two lines look like a pair.
+    const wrong = ["timeline.style.scrollBehavior = 'auto';", 'scroller.scrollTop += delta;'].join(
+      '\n',
+    );
+    expect(checkBareScrollWrite(wrong, 'a.astro')).toHaveLength(1);
+  });
+
+  it('does not let a second write borrow the set-aside of the first', () => {
+    // Where somebody would add one: right under a legitimate pair. The second
+    // write is animated all the same, and it is the one the hidden-tab defect
+    // arrives through.
+    const borrowed = [
+      "var behaviour = scroller.style.scrollBehavior;",
+      "scroller.style.scrollBehavior = 'auto';",
+      'scroller.scrollTop += delta;',
+      'scroller.style.scrollBehavior = behaviour;',
+      'scroller.scrollTop += more;',
+    ].join('\n');
+    expect(checkBareScrollWrite(borrowed, 'a.astro')).toHaveLength(1);
+  });
+
+  it('does not fire on a set-aside too far above to be read as a pair', () => {
+    const far = [
+      "scroller.style.scrollBehavior = 'auto';",
+      `// ${'x'.repeat(320)}`,
+      'scroller.scrollTop += delta;',
+    ].join('\n');
+    expect(checkBareScrollWrite(far, 'a.astro')).toHaveLength(1);
+  });
+
+  it('reads a scroll position without writing one', () => {
+    expect(checkBareScrollWrite('var left = timeline.scrollLeft + delta;', 'a.astro')).toEqual([]);
+    expect(checkBareScrollWrite('if (a.scrollTop === b) return;', 'a.astro')).toEqual([]);
+    expect(checkBareScrollWrite('if (a.scrollTop !== b) return;', 'a.astro')).toEqual([]);
+    expect(checkBareScrollWrite('if (a.scrollTop >= b) return;', 'a.astro')).toEqual([]);
+  });
+
+  it('ignores the rule written about rather than broken', () => {
+    expect(checkBareScrollWrite('// never write scroller.scrollTop += x here', 'a.astro')).toEqual(
+      [],
+    );
+    expect(
+      checkBareScrollWrite('/* scroller.scrollLeft = 0 is not instant */', 'a.astro'),
+    ).toEqual([]);
+    expect(checkBareScrollWrite('var why = "el.scrollTop += 1 animates";', 'a.astro')).toEqual([]);
+  });
+
+  it('says nothing about a file that scrolls nothing', () => {
+    expect(checkBareScrollWrite('const a = 1;', 'a.ts')).toEqual([]);
+  });
+});
+
+/* The room a sideways bar needs at its ends.
+ *
+ * `reveal()` works out where the current tick has to go and the browser
+ * truncates it, because past the last tick there is nothing to scroll onto. The
+ * evenings in the middle centre and the ones at the ends do not — and the site
+ * opens on the next evening still to come, which is almost always the last.
+ */
+describe('checkCentringSpace', () => {
+  const BAR = '.timeline[data-timeline] { overflow-x: auto; overflow-y: hidden; }';
+
+  it('reports a sideways bar with no room at its ends', () => {
+    const violations = checkCentringSpace(`${BAR}\n.timeline-strip { width: max-content; }`);
+    expect(violations).toHaveLength(1);
+    expect(violations[0]!.detail).toContain('data-timeline');
+  });
+
+  it('accepts half a viewport declared at both ends', () => {
+    const roomy = `${BAR}\n.timeline-strip { width: max-content; padding-inline: calc(50vw - var(--space-3)); }`;
+    expect(checkCentringSpace(roomy)).toEqual([]);
+  });
+
+  it('accepts the two ends written apart, and the shorthand', () => {
+    const apart = `${BAR}\n.timeline-strip { padding-inline-start: 50vw; padding-inline-end: 50vw; }`;
+    expect(checkCentringSpace(apart)).toEqual([]);
+
+    const sides = `${BAR}\n.timeline-strip { padding-left: 50%; padding-right: 50%; }`;
+    expect(checkCentringSpace(sides)).toEqual([]);
+
+    const shorthand = `${BAR}\n.timeline-strip { padding: 0 50vw; }`;
+    expect(checkCentringSpace(shorthand)).toEqual([]);
+
+    const four = `${BAR}\n.timeline-strip { padding: 0 50vw 0 50vw; }`;
+    expect(checkCentringSpace(four)).toEqual([]);
+  });
+
+  it('does not take a comfortable-looking fixed length for the room', () => {
+    // What tidying the line up looks like, and it centres nothing: half a bar
+    // is a share of the viewport, not a number of pixels.
+    const tidied = `${BAR}\n.timeline-strip { padding-inline: 8px; }`;
+    expect(checkCentringSpace(tidied)).toHaveLength(1);
+  });
+
+  it('wants the room at both ends and not at one', () => {
+    const half = `${BAR}\n.timeline-strip { padding-inline: 50vw 0; }`;
+    expect(checkCentringSpace(half)).toHaveLength(1);
+  });
+
+  it('says nothing about a stylesheet with nothing scrolling sideways', () => {
+    expect(checkCentringSpace(SCROLLER)).toEqual([]);
+    expect(checkCentringSpace('.a { color: red; }')).toEqual([]);
   });
 });

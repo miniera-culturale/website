@@ -1,6 +1,6 @@
 # Controllo qualità — quello che resta da fare
 
-**136 controlli**, divisi per dispositivo. Ogni casella è **una azione sola**, su un
+**156 controlli**, divisi per dispositivo. Ogni casella è **una azione sola**, su un
 dispositivo solo, contro un componente solo: o è stata fatta o non lo è stata. Se per
 rispondere a una riga ti servono due gesti, la riga è scritta male — dillo invece di
 arrangiarti, perché è così che un collaudo comincia a mentire.
@@ -17,20 +17,21 @@ Il sito da provare è **https://website-e69.pages.dev**
 
 | Dispositivo | Da fare | di cui ★ |
 |---|---|---|
-| [iPhone Safari 15.4-16.3](#iphone-safari-154-163) | 30 | 20 |
-| [iPhone recente (Safari 18+)](#iphone-recente-safari-18) | 57 | 34 |
-| [Android di 4 anni (Chrome)](#android-di-4-anni-chrome) | 2 | 1 |
+| [iPhone Safari 15.4-16.3](#iphone-safari-154-163) | 32 | 22 |
+| [iPhone recente (Safari 18+)](#iphone-recente-safari-18) | 63 | 40 |
+| [Android Chrome recente](#android-chrome-recente) | 1 | 1 |
+| [Android di 4 anni (Chrome)](#android-di-4-anni-chrome) | 4 | 3 |
 | [iPad (Safari)](#ipad-safari) | 1 | 0 |
-| [Desktop Chrome (Windows)](#desktop-chrome-windows) | 13 | 5 |
-| [Desktop Firefox (Windows)](#desktop-firefox-windows) | 5 | 4 |
+| [Desktop Chrome (Windows)](#desktop-chrome-windows) | 19 | 11 |
+| [Desktop Firefox (Windows)](#desktop-firefox-windows) | 8 | 6 |
 | [Desktop Safari (macOS)](#desktop-safari-macos) | 28 | 21 |
-| **Totale** | **136** | **85** |
+| **Totale** | **156** | **104** |
 
 ---
 
 ## iPhone Safari 15.4-16.3
 
-*30 controlli.* È la soglia dichiarata del progetto e non l’ha mai aperta nessuno. Se qui il layout arriva a due colonne invece che a una, il minificatore ha riscritto le media query nella sintassi range e ogni telefono fra 15.4 e 16.3 riceve il layout del desktop: è il difetto che questo dispositivo esiste per trovare, e l’unica cosa che oggi lo difende è una guardia.
+*32 controlli.* È la soglia dichiarata del progetto e non l’ha mai aperta nessuno. Se qui il layout arriva a due colonne invece che a una, il minificatore ha riscritto le media query nella sintassi range e ogni telefono fra 15.4 e 16.3 riceve il layout del desktop: è il difetto che questo dispositivo esiste per trovare, e l’unica cosa che oggi lo difende è una guardia.
 
 ### verticale
 
@@ -49,7 +50,7 @@ Il sito da provare è **https://website-e69.pages.dev**
       → *La barra scorre, ogni tacca porta la sua data, nessuna è un segno nudo*
 
 - [ ] **QA-017** ★ · Timeline — Toccare la tacca della serata 78
-      → *La pagina atterra sulla 78 subito, senza attraversare le serate in mezzo*
+      → *La pagina si muove fino alla 78 e ci si ferma: rotaia, accento e indirizzo dicono tutti la 78*
 
 - [ ] **QA-018** ★ · Timeline — Misurare la pillola con un dito
       → *Almeno 44 px di altezza; toccandone una non si colpisce quella accanto*
@@ -68,6 +69,12 @@ Il sito da provare è **https://website-e69.pages.dev**
 
 - [ ] **QA-070** ★ · Programme — Scorrere con la barra di Safari mostrata e poi ritratta
       → *La scena resta alta quanto lo schermo e le posizioni di snap non saltano (svh, non dvh)*
+
+- [ ] **QA-345** ★ · Timeline — Toccare una tacca lontana e guardare la barra
+      → *La barra si muove fino a portare la pillola al centro: si vede il movimento, non uno scatto*
+
+- [ ] **QA-346** ★ · Timeline — Guardare dove sta la pillola della serata a schermo, all’apertura e sulla serata più vecchia
+      → *È al centro della barra in tutt’e due i casi*
 
 - [ ] **QA-003** · Programme — Trascinare lentamente fino a metà scena e rilasciare
       → *Atterra su una sola scena e non oscilla fra le due*
@@ -137,7 +144,7 @@ Il sito da provare è **https://website-e69.pages.dev**
 
 ## iPhone recente (Safari 18+)
 
-*57 controlli.* Il telefono su cui il sito verrà letto davvero. Qui `content-visibility` esiste, quindi è anche l’unico posto in cui si vede se lo scorrimento di ottantuno serate resta fluido.
+*63 controlli.* Il telefono su cui il sito verrà letto davvero. Qui `content-visibility` esiste, quindi è anche l’unico posto in cui si vede se lo scorrimento di ottantuno serate resta fluido.
 
 ### VoiceOver
 
@@ -258,7 +265,7 @@ Il sito da provare è **https://website-e69.pages.dev**
       → *La barra scorre, ogni tacca porta la sua data, nessuna è un segno nudo*
 
 - [ ] **QA-041** ★ · Timeline — Toccare la tacca della serata 78
-      → *La pagina atterra sulla 78 subito, senza attraversare le serate in mezzo*
+      → *La pagina si muove fino alla 78 e ci si ferma: rotaia, accento e indirizzo dicono tutti la 78*
 
 - [ ] **QA-042** ★ · Timeline — Misurare la pillola con un dito
       → *Almeno 44 px di altezza; toccandone una non si colpisce quella accanto*
@@ -278,6 +285,21 @@ Il sito da provare è **https://website-e69.pages.dev**
 - [ ] **QA-334** ★ · Timeline — Toccare una tacca e poi il gesto indietro
       → *Stesso esito del desktop*
 
+- [ ] **QA-339** ★ · Timeline — Aprire il sito e guardare dove sta la pillola della serata a schermo
+      → *È al centro della barra, non attaccata al bordo destro*
+
+- [ ] **QA-340** ★ · Timeline — Scorrere fino alla serata più vecchia dell’archivio e guardare la sua pillola
+      → *È al centro della barra; a sinistra resta mezza barra vuota, ed è voluto*
+
+- [ ] **QA-341** ★ · Timeline — Toccare una tacca lontana e guardare la barra
+      → *La barra si muove fino a portare la pillola al centro: si vede il movimento, non uno scatto*
+
+- [ ] **QA-342** ★ · Timeline — Tenere il dito su una tacca senza rilasciare
+      → *La pillola cede sotto il dito e torna com’era al rilascio*
+
+- [ ] **QA-343** ★ · Programme — Toccare una tacca lontana e riprendere subito lo scorrimento con il dito
+      → *Il dito vince: la pagina resta dove la lascia il lettore e non viene strattonata sulla serata del tocco*
+
 - [ ] **QA-027** · Programme — Trascinare lentamente fino a metà scena e rilasciare
       → *Atterra su una sola scena e non oscilla fra le due*
 
@@ -291,7 +313,7 @@ Il sito da provare è **https://website-e69.pages.dev**
       → *La favicon si legge; la barra è colorata come il sito (theme-color)*
 
 - [ ] **QA-309** · Timeline — Scorrere il programma e guardare la barra
-      → *La pillola corrente viene portata in vista senza scatti*
+      → *La pillola corrente arriva al centro con un movimento visibile, non di scatto*
 
 - [ ] **QA-330** · Programme — Cercare nella pagina una serata lontana
       → *La ricerca del browser la trova: content-visibility non la nasconde*
@@ -335,6 +357,11 @@ Il sito da provare è **https://website-e69.pages.dev**
 - [ ] **QA-037** · Modal — Toccare il fondo scuro fuori dal pannello
       → *Si chiude*
 
+**Su `/85`**
+
+- [ ] **QA-344** ★ · Programme — Aprire /85 in una scheda nuova di sfondo e passarci solo dopo che ha finito di caricare
+      → *Si apre sulla serata 85 e non in cima all’archivio*
+
 **Su `/componenti`**
 
 - [ ] **QA-301** ★ · Button — Toccare un bottone e poi toccare altrove
@@ -364,9 +391,23 @@ Il sito da provare è **https://website-e69.pages.dev**
 
 ---
 
+## Android Chrome recente
+
+*1 controlli.* Era finito, e la PR 20 lo riapre su una riga sola: il movimento della barra è la cosa che questo dispositivo aveva già visto funzionare, e adesso funziona diversamente.
+
+### verticale
+
+**Su `/`**
+
+- [ ] **QA-054** ★ · Timeline — Scorrere la barra fino alla 78 e toccarla
+      → *La barra si muove fino a portare la pillola al centro e la pagina arriva sulla 78*
+
+
+---
+
 ## Android di 4 anni (Chrome)
 
-*2 controlli.* Non un modello di punta: serve un telefono lento, perché la domanda è se il sito resti usabile su quello che ha in tasca il pubblico dell’associazione.
+*4 controlli.* Non un modello di punta: serve un telefono lento, perché la domanda è se il sito resti usabile su quello che ha in tasca il pubblico dell’associazione.
 
 ### 3G lenta
 
@@ -377,6 +418,17 @@ Il sito da provare è **https://website-e69.pages.dev**
 
 - [ ] **QA-328** · Scene — Guardare l’arrivo della prima fotografia
       → *Arriva dopo il testo e non sposta niente quando arriva*
+
+### verticale
+
+**Su `/`**
+
+- [ ] **QA-064** ★ · Timeline — Scorrere la barra fino alla 78 e toccarla
+      → *La barra si muove fino a portare la pillola al centro e la pagina arriva sulla 78*
+      · **Già misurato:** Provata su un Google Pixel (modello da registrare).
+
+- [ ] **QA-347** ★ · Timeline — Toccare una tacca lontana e guardare la barra
+      → *La barra si muove fino a centrare la pillola, e il movimento non è a scatti su un telefono di quattro anni*
 
 
 ---
@@ -397,17 +449,28 @@ Il sito da provare è **https://website-e69.pages.dev**
 
 ## Desktop Chrome (Windows)
 
-*13 controlli.* Quello che resta qui non è di resa: è il CMS, che scrive davvero sul repository, e due gesti che nessuna automazione può fare.
+*19 controlli.* Quello che resta qui non è di resa: è il CMS, che scrive davvero sul repository, e due gesti che nessuna automazione può fare.
 
 ### 1280x800
 
 **Su `/`**
+
+- [ ] **QA-098** ★ · Timeline — Cliccare la tacca della serata 78
+      → *La pagina si muove fino alla 78 e ci si ferma: rotaia, accento e indirizzo dicono tutti la 78*
+
+- [ ] **QA-099** ★ · Timeline — Cliccare due tacche lontane a due decimi di distanza
+      → *Atterra sulla seconda; rotaia, accento e indirizzo dicono la stessa serata*
 
 - [ ] **QA-331** · Programme — Cercare con Ctrl+F il titolo della serata 78 partendo da /
       → *Il browser la trova e ci porta*
 
 - [ ] **QA-335** · Timeline — Cliccare una tacca con il tasto centrale del mouse
       → *Si apre in una nuova scheda: il click di comando resta al browser*
+
+**Su `/85`**
+
+- [ ] **QA-349** ★ · Programme — Aprire /85 in una scheda di sfondo con Ctrl+clic e passarci dopo
+      → *Si apre sulla serata 85 e non in cima all’archivio*
 
 **Su `/admin`**
 
@@ -461,12 +524,41 @@ Il sito da provare è **https://website-e69.pages.dev**
 - [ ] **QA-230** · pages.css — Ascoltare la riga del numero WhatsApp
       → *Il numero si sente in modo comprensibile*
 
+### prefers-reduced-motion
+
+**Su `/`**
+
+- [ ] **QA-170** ★ · Programme — Attivare la riduzione del movimento e scorrere
+      → *Nessuna animazione di scorrimento; i salti sono immediati*
+      · **Già misurato:** Quello che hai visto è l’esito atteso: il progetto non anima nessuno scorrimento per costruzione (regola 15), quindi sotto prefers-reduced-motion non cambia niente ed è giusto così. La riga andrebbe letta come OK.
+
+- [ ] **QA-171** ★ · Timeline — Cliccare una tacca lontana
+      → *Il salto è immediato, nessuna transizione lunga sulle tacche*
+
+- [ ] **QA-348** ★ · Timeline — Attivare la riduzione del movimento e cliccare una tacca lontana
+      → *Né la pagina né la barra si animano: tutt’e due arrivano di colpo*
+
 
 ---
 
 ## Desktop Firefox (Windows)
 
-*5 controlli.* Ventiquattro righe su ventinove sono già state percorse pilotando Firefox 153. Le cinque che restano hanno tutte la stessa ragione: `document.hasFocus()` è falso quando la finestra non è in primo piano, quindi nessuno stile di messa a fuoco si applica e la domanda «si vede?» non si può porre da uno script.
+*8 controlli.* Ventiquattro righe su ventinove sono già state percorse pilotando Firefox 153. Le cinque che restano hanno tutte la stessa ragione: `document.hasFocus()` è falso quando la finestra non è in primo piano, quindi nessuno stile di messa a fuoco si applica e la domanda «si vede?» non si può porre da uno script.
+
+### 1280x800
+
+**Su `/`**
+
+- [ ] **QA-115** ★ · Timeline — Cliccare la tacca della serata 78
+      → *La pagina si muove fino alla 78 e ci si ferma: rotaia, accento e indirizzo dicono tutti la 78*
+      · **Già misurato:** Atterra sulla 78, indirizzo /78#serata-78, accento del ciclo 2
+
+- [ ] **QA-116** ★ · Timeline — Cliccare due tacche lontane a due decimi di distanza
+      → *Atterra sulla seconda; rotaia, accento e indirizzo dicono la stessa serata*
+      · **Già misurato:** Due click a due decimi di distanza: scena 83, indirizzo /83, accento 6, tacca corrente all’indice 4 — le quattro cose concordano
+
+- [ ] **QA-350** · Timeline — Cliccare due tacche lontane a due decimi di distanza e guardare dove si ferma la pagina
+      → *Si ferma sulla seconda; se il primo salto viene lasciato cadere si vede uno scatto, non una serata sbagliata*
 
 ### anteprima di stampa
 
@@ -521,7 +613,7 @@ Il sito da provare è **https://website-e69.pages.dev**
       → *Tutte le serate hanno una tacca; le vicine portano la data, le lontane sono segni*
 
 - [ ] **QA-132** ★ · Timeline — Cliccare la tacca della serata 78
-      → *Atterra sulla 78 subito e l’indirizzo diventa /78*
+      → *La pagina si muove fino alla 78 e ci si ferma: rotaia, accento e indirizzo dicono tutti la 78*
 
 - [ ] **QA-133** ★ · Timeline — Cliccare due tacche lontane a due decimi di distanza
       → *Atterra sulla seconda; rotaia, accento e indirizzo dicono la stessa serata*

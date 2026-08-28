@@ -197,15 +197,24 @@ describe('the published Timeline', () => {
     expect(checkRailHoldsTheArchive(home!.css, HOME)).toEqual([]);
   });
 
-  it('animates no jump, and can still be asked for less movement', () => {
-    /* No `scroll-behavior: smooth` anywhere, and its absence is the fix rather
-       than an omission: the property reaches only the scrolls a script asks
-       for, every one of those is a jump to an evening, and an animated jump can
-       be interrupted — the second of two ticks tapped in quick succession is
-       dropped by the engine and the programme stays on the first while the
-       rail, the accent and the address name the second. Read in dist/ because
-       that is where somebody putting it back would put it. */
-    expect(home!.css).not.toMatch(/scroll-behavior:\s*smooth/);
+  it('animates its jumps as a property, and can still be asked for less movement', () => {
+    /* `scroll-behavior: smooth`, and declared rather than passed: from PR 20 the
+       jumps move, because the client on a phone read a tick that changes
+       everything and moves nothing as the site not having answered.
+
+       Read in dist/ because that is where the half that matters lives. As a
+       property it is revocable — the block below takes it away — while the same
+       animation asked for as `behavior: 'smooth'` in a scroll call would beat
+       any stylesheet, look identical in dist/, and fail nothing. That is the
+       swap this asserts against, and it is why the assertion is about the shape
+       and not about the movement.
+
+       What the PR 9 measurement worried about — a second jump dropped while the
+       first is in flight, leaving the page on one evening while the rail, the
+       accent and the address name another — is answered in Programme.astro by
+       checking where the scrolling landed, not by refusing to move. */
+    expect(home!.css).toMatch(/scroll-behavior:\s*smooth/);
+    expect(home!.css).toMatch(/\.timeline[^{}]*\{[^}]*scroll-behavior:\s*smooth/);
 
     // And the refusal that was always there: under reduced motion the snap goes
     // too, which is what turns the scroller into a list.

@@ -179,7 +179,8 @@ function rank(index: number): string | undefined {
     white-space: nowrap;
     transition:
       color var(--dur-slow) var(--ease-out),
-      font-size var(--dur-base) var(--ease-out);
+      font-size var(--dur-base) var(--ease-out),
+      transform var(--dur-fast) var(--ease-out);
   }
 
   /* A bare mark: no date, and a pitch small enough that the whole archive fits
@@ -310,6 +311,14 @@ function rank(index: number): string | undefined {
       overflow-x: auto;
       overflow-y: hidden;
       scrollbar-width: none;
+      /* What the bar was missing, and the whole of it: `reveal()` in
+         Programme.astro did the arithmetic right and then moved the bar in a
+         single frame, because a scroll asked for by a script takes the *how*
+         from here — and nothing was declared. The client, on a phone, read that
+         as the site not having answered at all. Under `prefers-reduced-motion`
+         global.css puts `auto` back with `!important`, so this costs that
+         reader nothing. */
+      scroll-behavior: smooth;
     }
 
     .timeline[data-timeline]::-webkit-scrollbar {
@@ -326,6 +335,28 @@ function rank(index: number): string | undefined {
       flex-direction: row;
       justify-content: flex-start;
       width: max-content;
+      /* Half a bar of nothing at each end, which is what lets the first evening
+         and the last one reach the middle. Without it `reveal()` computes the
+         right position and the browser truncates it — past the edge there is
+         nothing to scroll onto — so the ticks that cannot centre are the first
+         and the last, and the evening this site opens on is the next one still
+         to come: almost always the last. The case that failed was the ordinary
+         case. Measured on the preview of PR 19 at 390px: the first tick sat
+         184px off centre, the last one 188px the other way.
+
+         **Half a bar and not `50%`**, which is the form this was written in
+         first: on a box that is `width: max-content` a percentage padding
+         resolves against the box's own content, so the space grew with the
+         archive — measured at PR 20 in Firefox 154, three times the ticks gave
+         three times the padding. Seven evenings made 302px a side and looked
+         right; eighty-one would make about 3500, and the bar would scroll into
+         thousands of pixels of nothing. The bar is the viewport less its two
+         insets, so half of it is this, and it says the same thing at any length
+         of archive.
+
+         The price is visible and was accepted: with the last evening centred,
+         the right half of the bar is empty. */
+      padding-inline: calc(50vw - var(--space-3));
     }
 
     /* Sideways the bar is drawn out of the shorter sum declared in the tokens:
@@ -361,7 +392,8 @@ function rank(index: number): string | undefined {
       text-transform: uppercase;
       transition:
         background var(--dur-base) var(--ease-out),
-        color var(--dur-base) var(--ease-out);
+        color var(--dur-base) var(--ease-out),
+        transform var(--dur-fast) var(--ease-out);
     }
 
     .timeline-tick[data-near='0'] {
@@ -373,6 +405,16 @@ function rank(index: number): string | undefined {
     .tick-mark {
       display: none;
     }
+  }
+
+  /* The one state this design system has, and on a phone the only answer a
+     finger gets: the page moves a moment later, and until it does nothing had
+     told the reader the press was received. Not the `translateY(2px)` of
+     Button, Modal and the materials of a scene — down a row of pills sitting
+     side by side that reads as one of them slipping, while a pill giving under
+     the finger reads as a press. */
+  .timeline-tick:active {
+    transform: scale(0.94);
   }
 
   /* Fine on the ground of a scene, and unreadable on the filled pill of the

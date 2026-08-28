@@ -188,23 +188,43 @@ non una preferenza.
     e una parola ne vuole 4,5 — è la decisione che `Modal.astro` aveva già
     scritto per il link dentro il pannello.
 
-15. **Lo scroller non anima i salti, e se l'animazione tornasse tornerebbe come
-    proprietà — mai come argomento.** `scroll-behavior` raggiunge solo gli
-    scorrimenti che chiede uno script, e qui sono tutti salti a una serata: un
-    salto animato è interrompibile, e un secondo salto partito mentre il primo è
-    in volo il motore lo lascia cadere. La pagina resta sulla prima destinazione
-    mentre rotaia, accento e indirizzo dicono la seconda — due tacche toccate a
-    due decimi di distanza bastano, e quello che resta è un sito che si
-    contraddice senza niente da vedere. La PR 8 l'aveva spedito e aveva
-    archiviato il sintomo come una misura sbagliata; la PR 9 l'ha riprodotto e
-    tolto la proprietà. Adesso i salti atterrano subito, il che risponde anche a
-    `prefers-reduced-motion` per costruzione invece che con una regola che deve
-    continuare a vincere. **`checkSmoothScrollArgument` in
-    `test/guards/scroller.ts` resta e conta di più**: un `{ behavior: 'smooth' }`
-    passato a mano rimetterebbe l'animazione dove nessun foglio di stile la
-    raggiunge, e ogni salto fatto da script continua a chiamare
-    `scrollIntoView()` **senza argomenti**. La guardia legge il sorgente e lascia
-    stare il foglio di stile: a distinguerli sono le virgolette.
+15. **I salti si muovono, e il movimento è una proprietà — mai un argomento.**
+    `scroll-behavior: smooth` sta su `[data-scroller]` e su `[data-timeline]`,
+    quindi `prefers-reduced-motion` se lo può riprendere: lo fa `global.css` con
+    `scroll-behavior: auto !important`. Un `{ behavior: 'smooth' }` passato a
+    mano batte quella regola — l'argomento vince sulla proprietà, per specifica e
+    in ogni motore — e resta vietato: `checkSmoothScrollArgument` legge il
+    sorgente e lascia stare il foglio di stile, che a distinguerli sono le
+    virgolette. **La metà opposta è permessa apposta**, `behavior: 'instant'`:
+    spegnere il movimento non può essere ciò di cui si lamenta chi ne ha chiesto
+    di meno.
+
+    L'animazione c'era dalla PR 8, è stata tolta alla PR 9 per una ragione
+    misurata — un salto animato è interrompibile, e un secondo salto partito
+    mentre il primo è in volo veniva lasciato cadere, con la pagina su una serata
+    e rotaia, accento e indirizzo su un'altra — ed è tornata alla PR 20 perché il
+    committente, su un telefono, ha detto che premere una tacca non produce
+    nessun movimento e il sito sembra non aver risposto. **A rendere innocua la
+    misura della PR 9 non è una promessa sui motori: è `settle()`**, che a
+    scorrimento fermo confronta l'atterraggio con la destinazione e lo corregge
+    se non combaciano. Il difetto non si evita più — evitarlo si poteva solo
+    rinunciando a muoversi — si corregge.
+
+    **E un'assegnazione diretta non è un salto.** `scroller.scrollTop += …` non è
+    istantaneo: il setter scorre con il behavior «auto», e «auto» vuol dire *il
+    valore calcolato di `scroll-behavior`*. Misurato alla PR 20 su Firefox 154 e
+    Chromium 148, dopo che il contrario era stato scritto in `docs/piano.md` e
+    ripetuto nel piano della PR 20. Il costo è silenzioso: **uno scorrimento
+    animato non avanza in una scheda nascosta**, quindi il salto d'apertura
+    scritto così manda `/85` aperto in una scheda di sfondo in cima all'archivio,
+    e il lettore ci arriva quando torna sulla scheda. I due scorrimenti che
+    devono restare istantanei — il salto d'apertura e la correzione di
+    `settle()` — **mettono da parte la proprietà per quel solo scorrimento**,
+    `style.scrollBehavior = 'auto'` sulla riga sopra e rimessa subito dopo. Non
+    `behavior: 'instant'`: `behavior` è un enum WebIDL, quindi un valore che il
+    motore non conosce **lancia** invece di ricadere sulla proprietà, e lanciato
+    dal salto d'apertura si porta via il salto. `checkBareScrollWrite` pretende
+    quell'accoppiata: toglierla rimette il difetto, e la guardia scatta.
 
 16. **L'indirizzo segue la serata a schermo, e si sostituisce — non si
     impila.** Ogni serata è una rotta e le tacche restano frammenti, perché
@@ -512,7 +532,7 @@ npm run preview      # anteprima della build
 npm test             # guardie e test, con una build dentro
 npm run test:mutate  # acceca ogni guardia a turno e pretende che la suite se
                      # ne accorga — due minuti, la gira la CI a fette. È la
-                     # suite intera una volta per guardia, e le guardie sono 80:
+                     # suite intera una volta per guardia, e le guardie sono 82:
                      # ciò che è cambiato è che le corse vanno in parallelo,
                      # non che ne giri una parte
 npm run check        # astro check, typecheck
